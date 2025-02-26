@@ -79,6 +79,7 @@ html {
     gap: 45px;
     align-items: center;
     border-radius: 24px;
+    min-height: 100vh;
 }
 
 .logo {
@@ -93,6 +94,7 @@ html {
     display: flex;
     flex-direction: column;
     gap: 10px;
+    overflow-y: auto;
 }
 
 .sidebar a {
@@ -417,6 +419,7 @@ html {
     justify-content: space-between;
     align-items: center;
     margin-bottom: 20px;
+    flex-wrap: wrap;
 }
 
 .admin-header h1 {
@@ -430,41 +433,50 @@ html {
 }
 
 .download-btn {
-    background: #8b6e47;
+    background: #BD925c;
     color: white;
     border: none;
-    padding: 8px 16px;
-    border-radius: 4px;
+    padding: 16px 59px;
+    border-radius: 5px;
     cursor: pointer;
-    font-size: 14px;
+    font-weight: 600;
+    font-size: 0.75rem;
 }
 
-.download-btn:hover {
-    background: #7a5f3a;
+.adminRenderTable {
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0px 0px 20px 0px #0000000D;
+    background-color: white;
 }
 
 .admin-actions {
-    margin-bottom: 20px;
+    margin-bottom: 28px;
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+    flex-wrap: wrap;
 }
 
 .action-btn {
-    padding: 10px 20px;
     border: none;
-    border-radius: 4px;
     cursor: pointer;
-    font-size: 16px;
-    margin-right: 10px;
-    background: #666;
+    background: #BDBFC4;
     color: white;
     transition: background 0.3s;
+    padding: 16px 59px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.75rem;
 }
 
 .action-btn.active {
-    background: #2c3e50;
+    background: #295860;
 }
 
 .action-btn:hover {
-    background: #555;
+    background: #295860;
 }
 
 .table-container {
@@ -481,16 +493,36 @@ html {
 .data-table td {
     padding: 12px;
     text-align: left;
-    border-bottom: 1px solid #eee;
-    font-size: 14px;
-    color: #333;
+    border-bottom: 1px solid #DDDDDD;
+    color: #757676;
+    font-weight: 400;
+    font-size: 0.9rem;
+    line-height: 34px;
+    letter-spacing: -2%;
 }
 
 .data-table th {
-    background: #f5f5f5;
+    background: #F7F7F7;
     font-weight: bold;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #181A20;
+    border: none;
 }
 
-.data-table tr:hover {
-    background: #f9f9f9;
+.image-cell a{
+    font-size: 0.6rem;
+    color: #757676;
+    font-weight: 400;
 }
+
+.table-container {
+    overflow-x: auto; /* Enables horizontal scrolling */
+    max-width: 1200px; /* Set your desired max-width */
+  }
+  
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 800px; /* Ensures table doesn't shrink too much, adjust as needed */
+  }

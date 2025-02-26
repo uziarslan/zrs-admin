@@ -140,7 +140,7 @@ export default function Signup() {
           </div>
           <button
             type="submit"
-            disabled={isEmailValid}
+            disabled={!isEmailValid}
             className="d-flex justify-content-between align-items-center my-3"
           >
             Sign up

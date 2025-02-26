@@ -9,21 +9,18 @@ const Users = () => {
   const [financeData, setFinanceData] = useState([]);
   const [sellCarData, setSellCarData] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [activeTab, setActiveTab] = useState("finance"); // Toggle between finance and sell car data
-  const itemsPerPage = 5; // Matches the table rows in the screenshot
+  const [activeTab, setActiveTab] = useState("sellCar");
+  const [selectedImages, setSelectedImages] = useState(null); // For image modal
+  const itemsPerPage = 5;
 
   // Fetch data from backend
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        // Fetch finance eligibility data
-        const financeResponse = await axiosInstance.get(
-          "/api/v1/finance-eligibility"
-        );
+        const financeResponse = await axiosInstance.get("/api/v1/finance-eligibility");
         setFinanceData(financeResponse.data || []);
 
-        // Fetch sell car data
         const sellCarResponse = await axiosInstance.get("/api/v1/sell-car");
         setSellCarData(sellCarResponse.data || []);
       } catch (err) {
@@ -37,9 +34,8 @@ const Users = () => {
   }, [setIsLoading]);
 
   // Get current items for pagination
-  const totalItems =
-    activeTab === "finance" ? financeData.length : sellCarData.length;
-  const totalPages = Math.max(1, Math.ceil(totalItems / itemsPerPage)); // Ensure at least 1 page
+  const totalItems = activeTab === "finance" ? financeData.length : sellCarData.length;
+  const totalPages = Math.max(1, Math.ceil(totalItems / itemsPerPage));
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentData =
@@ -47,21 +43,20 @@ const Users = () => {
       ? financeData.slice(indexOfFirstItem, indexOfLastItem)
       : sellCarData.slice(indexOfFirstItem, indexOfLastItem);
 
-  // Handle page change with bounds checking
+  // Handle page change
   const handlePageChange = (page) => {
     if (page >= 1 && page <= totalPages) {
       setCurrentPage(page);
     }
   };
 
-  // Render pagination matching ManageCars.js (up to 5 buttons, ellipsis, arrows)
+  // Render pagination
   const renderPagination = () => {
     if (totalPages <= 1) return null;
 
     const pagination = [];
-    const maxVisiblePages = 5; // Show up to 5 page numbers/buttons
+    const maxVisiblePages = 5;
 
-    // Always show first page
     pagination.push(
       <button
         key={1}
@@ -73,27 +68,18 @@ const Users = () => {
       </button>
     );
 
-    // Determine the range of pages to show (up to 2 before and 2 after current page)
     let startPage = Math.max(2, currentPage - 2);
     let endPage = Math.min(totalPages - 1, currentPage + 2);
 
-    // Ensure we show at least maxVisiblePages - 2 pages (excluding first and last)
     if (endPage - startPage < maxVisiblePages - 3) {
       if (startPage > 2) {
-        startPage = Math.max(
-          2,
-          startPage - (maxVisiblePages - 3 - (endPage - startPage))
-        );
+        startPage = Math.max(2, startPage - (maxVisiblePages - 3 - (endPage - startPage)));
       }
       if (endPage < totalPages - 1) {
-        endPage = Math.min(
-          totalPages - 1,
-          endPage + (maxVisiblePages - 3 - (endPage - startPage))
-        );
+        endPage = Math.min(totalPages - 1, endPage + (maxVisiblePages - 3 - (endPage - startPage)));
       }
     }
 
-    // Add ellipsis and middle pages
     if (startPage > 2) {
       pagination.push(<span key="start-ellipsis">...</span>);
     }
@@ -111,7 +97,6 @@ const Users = () => {
       );
     }
 
-    // Add ellipsis and last page if needed
     if (endPage < totalPages - 1) {
       pagination.push(<span key="end-ellipsis">...</span>);
     }
@@ -143,9 +128,7 @@ const Users = () => {
         <button
           onClick={() => handlePageChange(currentPage + 1)}
           disabled={currentPage === totalPages}
-          className={`pagination-arrow ${
-            currentPage === totalPages ? "disabled" : ""
-          }`}
+          className={`pagination-arrow ${currentPage === totalPages ? "disabled" : ""}`}
           aria-label="Next page"
         >
           <img src={arrowRight} alt="Next page" />
@@ -154,10 +137,19 @@ const Users = () => {
     );
   };
 
-  // Handle download (simulated for now)
+  // Handle download
   const handleDownload = () => {
     console.log("Download file clicked");
-    // Add logic to download data as CSV or PDF here
+    // Add download logic here
+  };
+
+  // Image modal handlers
+  const openImageModal = (images) => {
+    setSelectedImages(images);
+  };
+
+  const closeImageModal = () => {
+    setSelectedImages(null);
   };
 
   return (
@@ -171,53 +163,107 @@ const Users = () => {
           Download file
         </button>
       </div>
-      <div className="admin-actions">
-        <button
-          className={`action-btn ${activeTab === "finance" ? "active" : ""}`}
-          onClick={() => {
-            setActiveTab("finance");
-            setCurrentPage(1); // Reset to first page when switching tabs
-          }}
-        >
-          Query
-        </button>
-        <button
-          className={`action-btn ${activeTab === "sell" ? "active" : ""}`}
-          onClick={() => {
-            setActiveTab("sell");
-            setCurrentPage(1); // Reset to first page when switching tabs
-          }}
-        >
-          Test Drive
-        </button>
-      </div>
-      <div className="table-container">
-        <table className="data-table">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Email Address</th>
-              <th>Mobile Number</th>
-              <th>Query</th>
-            </tr>
-          </thead>
-          <tbody>
-            {currentData.map((item) => (
-              <tr key={item._id}>
-                <td>{item.fullName || "N/A"}</td>
-                <td>{item.email || "N/A"}</td>
-                <td>{item.mobileNumber || "N/A"}</td>
-                <td>
-                  {activeTab === "finance"
-                    ? `Finance query for ${item.manufacturer} ${item.vehicleType}`
-                    : `Sell car query for ${item.manufacturer} ${item.vehicleType}`}
-                </td>
+      <div className="adminRenderTable">
+        <div className="admin-actions">
+          <button
+            className={`action-btn ${activeTab === "sellCar" ? "active" : ""}`}
+            onClick={() => {
+              setActiveTab("sellCar");
+              setCurrentPage(1);
+            }}
+          >
+            Sell Car
+          </button>
+          <button
+            className={`action-btn ${activeTab === "sell" ? "active" : ""}`}
+            onClick={() => {
+              setActiveTab("sell");
+              setCurrentPage(1);
+            }}
+          >
+            Test Drive
+          </button>
+          <button
+            className={`action-btn ${activeTab === "finance" ? "active" : ""}`}
+            onClick={() => {
+              setActiveTab("finance");
+              setCurrentPage(1);
+            }}
+          >
+            Finance
+          </button>
+        </div>
+        <div className="table-container">
+          <table className="data-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Email Address</th>
+                <th>Mobile Number</th>
+                {activeTab === "sellCar" ? <th>Description</th> : <th>Query</th>}
+                {activeTab === "sellCar" && <th>Image</th>}
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {currentData.map((item) => (
+                <tr key={item._id}>
+                  <td>{item.fullName || "N/A"}</td>
+                  <td>{item.email || "N/A"}</td>
+                  <td>{item.mobileNumber || "N/A"}</td>
+                  <td>
+                    {activeTab === "finance"
+                      ? `Finance query for ${item.manufacturer} ${item.vehicleType}`
+                      : activeTab === "sell"
+                      ? `Sell car query for ${item.manufacturer} ${item.vehicleType}`
+                      : item.description || `Sell car query for ${item.manufacturer} ${item.vehicleType}`}
+                  </td>
+                  {activeTab === "sellCar" && (
+                    <td className="image-cell">
+                      {item.images && item.images.length > 0 ? (
+                        <a href="#!" onClick={() => openImageModal(item.images)}>
+                          Images({item.images.length})
+                        </a>
+                      ) : (
+                        "No image"
+                      )}
+                    </td>
+                  )}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
       {renderPagination()}
+
+      {/* Bootstrap Modal */}
+      {selectedImages && (
+        <div className="modal fade show d-block" tabIndex="-1" style={{ backgroundColor: "rgba(0,0,0,0.8)" }}>
+          <div className="modal-dialog modal-lg modal-dialog-centered">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">Car Images</h5>
+                <button type="button" className="btn-close" onClick={closeImageModal} aria-label="Close"></button>
+              </div>
+              <div className="modal-body">
+                {selectedImages.map((image, index) => (
+                  <img
+                    key={image._id}
+                    src={image.path}
+                    alt={`Car image ${index + 1}`}
+                    className="img-fluid mb-3"
+                  />
+                ))}
+              </div>
+              <div className="modal-footer">
+                <button type="button" className="btn btn-secondary" onClick={closeImageModal}>
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
