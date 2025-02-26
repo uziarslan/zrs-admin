@@ -1,0 +1,438 @@
+.verfication-notification {
+    position: fixed;
+    right: -200%;
+    top: 125px;
+    background-color: #16C75D;
+    color: white;
+    padding: 23px;
+    box-sizing: border-box;
+    border-radius: 12px 0 0 12px;
+    transition: right 0.5s ease-in-out;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    font-family: "Roboto", arial, sans-serif;
+    font-weight: bold;
+    font-style: normal;
+}
+
+.verfication-notification-error {
+    position: fixed;
+    right: -200%;
+    top: 125px;
+    background-color: #cc0000;
+    color: white;
+    padding: 23px;
+    box-sizing: border-box;
+    border-radius: 12px 0 0 12px;
+    transition: right 0.5s ease-in-out;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    font-family: "Roboto", arial, sans-serif;
+    font-weight: bold;
+    font-style: normal;
+}
+
+.verfication-notification .check-icon {
+    line-height: 0;
+}
+
+.verfication-notification.show {
+    right: 0;
+    z-index: 10000;
+}
+
+.verfication-notification-error.show {
+    right: 0;
+    z-index: 10000;
+}
+
+
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.534);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+/* HTML: <div class="loader"></div> */
+.loader {
+    width: 120px;
+    height: 20px;
+    transform: skewX(-45deg);
+    background:
+        linear-gradient(#f03355 0 0) left -30px top 0/30px 20px no-repeat #ccc;
+    animation: l3 1s infinite linear;
+}
+
+@keyframes l3 {
+    100% {
+        background-position: right -30px top 0
+    }
+}
+
+
+
+
+
+
+/* styles.css or App.css */
+
+.manageCarsHeader {
+    margin-bottom: 20px;
+}
+
+.manageCarsHeading {
+    font-size: 24px;
+    color: #2c3e50;
+    margin: 0 0 10px 0;
+}
+
+.manageCarsSubHeading {
+    font-size: 16px;
+    color: #666;
+    margin: 0;
+}
+
+.allCarsWrapper {
+    padding: 12px;
+    padding-bottom: 27px;
+    box-shadow: 0px 0px 20px 0px #0000000D;
+    border-radius: 12px;
+}
+
+.carCardHolder {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+}
+
+.cardLink {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid #2958601A;
+    box-shadow: 0px 0px 14px 0px #0000000D;
+}
+
+
+.cardBody {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    padding: 14px;
+}
+
+.cardHeader {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    padding: 14px 0px;
+}
+
+.badgeContainerWrapper {
+    display: flex;
+    gap: 5px;
+}
+
+.badgeContainer {
+    background: #2c3e50;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+}
+
+.badgeContainer.featured {
+    background: #2c3e50;
+}
+
+.badgeContainer.test {
+    background: #2c3e50;
+}
+
+.carVerticalButtons {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.cardctaButton {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px;
+}
+
+.cardDetailsContainer {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+}
+
+.singleInfoBlock {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    padding: 8px 12px;
+    background: #2958600D;
+    border-radius: 4px;
+}
+
+.singleInfoBlock img {
+    width: 27px;
+    height: 22px;
+    object-fit: contain;
+}
+
+.singleInfoValue {
+    font-weight: 400;
+    font-size: 0.8rem;
+    margin: 0;
+    color: #757676;
+}
+
+.carDesHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.carTitle {
+    display: flex;
+    flex-direction: row;
+    gap: 12px;
+}
+
+.manufacturerLogo {
+    width: 76px;
+    height: 57px;
+}
+
+.manufacturerLogo img {
+    object-fit: contain;
+    width: 100%;
+    height: 100%;
+}
+
+.manufacturerInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+}
+
+.manTypeTrim {
+    font-weight: 700;
+    font-size: 0.9rem;
+    margin: 0;
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.fuelType {
+    font-weight: 400;
+    font-size: 0.9rem;
+    color: #757676;
+    margin: 0;
+    text-transform: capitalize;
+}
+
+.pricingInfo {
+    display: flex;
+    flex-direction: row;
+    gap: 15px;
+}
+
+.priceContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    position: relative;
+    align-items: center;
+}
+
+.price {
+    border: 1px solid #295860;
+    padding: 8px 13.5px;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 0.8rem;
+    color: #295860;
+    border-radius: 12px;
+}
+
+.priceContainer span {
+    color: #295860;
+    font-weight: 800;
+    font-size: 0.6rem;
+    margin: 0;
+    position: absolute;
+    top: -8px;
+    width: 100%;
+    text-align: center;
+}
+
+.carThumbnailContainer {
+    width: 100%;
+    height: 150px;
+}
+
+.carThumbnailContainer img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+}
+
+.monthlyLease {
+    font-weight: 800;
+    font-size: 0.6rem;
+    margin: 0;
+    color: #295860;
+}
+
+.arrowButton {
+    width: 35px;
+    height: 35px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #295860;
+    border-radius: 50%;
+}
+
+
+
+/* Pagination Styling */
+.pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.pagination button {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 1px solid #ccc;
+    background: white;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.pagination button.active {
+    background: #2c3e50;
+    /* Teal from your image */
+    color: white;
+    border-color: #2c3e50;
+}
+
+.pagination button:disabled,
+.pagination-arrow.disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.pagination-arrow {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 1px solid #ccc;
+    background: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.pagination span {
+    /* For ellipsis */
+    font-size: 14px;
+}
+
+
+.filtersContainer {
+    padding: 14px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 25px;
+}
+
+.scrollableFilters {
+    display: flex;
+    flex-direction: row;
+    overflow-x: auto;
+    gap: 15px;
+}
+
+.scrollableFilters select,
+.filtersContainer input {
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    /* Gray border matching pagination */
+    border-radius: 4px;
+    /* Rounded corners, similar to pagination buttons */
+    font-size: 14px;
+    background: white;
+    /* White background like pagination buttons */
+    cursor: pointer;
+    min-width: 150px;
+    /* Minimum width for each select/input */
+    box-sizing: border-box;
+    color: #333;
+    /* Dark text for readability */
+    appearance: none;
+    /* Remove default browser styling */
+    -webkit-appearance: none;
+    /* Safari */
+    -moz-appearance: none;
+    /* Firefox */
+}
+
+.scrollableFilters select:focus,
+.filtersContainer input:focus {
+    outline: none;
+    border-color: #2c3e50;
+    /* Teal focus state matching pagination active state */
+    box-shadow: 0 0 5px rgba(44, 62, 80, 0.3);
+    /* Subtle teal shadow */
+}
+
+.scrollableFilters select {
+    background: white url('data:image/svg+xml;utf8,<svg width="12" height="8" viewBox="0 0 12 8" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 1L6 6L11 1" stroke="%232c3e50" stroke-width="2"/></svg>') no-repeat right 10px center;
+    background-size: 12px 8px;
+}
+
+.scrollableFilters::-webkit-scrollbar {
+    height: 8px;
+}
+
+.transparentBtn {
+    background: transparent;
+    border: none;
+    outline: none;
+}
