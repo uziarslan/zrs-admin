@@ -163,8 +163,10 @@ const Users = () => {
   return (
     <div className="admin-panel">
       <div className="admin-header">
-        <h1>Users</h1>
-        <p>We are glad to see you again!</p>
+        <div>
+          <h1 className="screenHeading">Users</h1>
+          <p className="screenSubHeading">We are glad to see you again!</p>
+        </div>
         <button className="download-btn" onClick={handleDownload}>
           Download file
         </button>
