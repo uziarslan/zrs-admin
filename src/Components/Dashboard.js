@@ -9,9 +9,14 @@ import Users from "./Users";
 
 function Dashboard() {
   const [currentScreen, setCurrentScreen] = useState("addManufacturer");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const handleScreenChange = (screen) => {
     setCurrentScreen(screen);
+  };
+
+  const toggleSidebar = () => {
+    setSidebarOpen(!sidebarOpen);
   };
 
   const renderScreen = () => {
@@ -40,8 +45,17 @@ function Dashboard() {
       <Sidebar
         onSelectScreen={handleScreenChange}
         currentScreen={currentScreen}
+        isOpen={sidebarOpen}
+        toggleSidebar={toggleSidebar}
       />
-      <div className="content">{renderScreen()}</div>
+      <div className="content">
+      {!sidebarOpen && (
+          <button className="mobile-toggle" onClick={toggleSidebar}>
+            ☰
+          </button>
+        )}
+        {renderScreen()}
+      </div>
     </div>
   );
 }

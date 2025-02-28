@@ -1,21 +1,22 @@
 body {
     font-family: "Urbanist", sans-serif;
     overflow-x: hidden;
-}
-
-html {
+    margin: 0;
+  }
+  
+  html {
     font-size: 20px;
-}
-
-.formGroup {
+  }
+  
+  .formGroup {
     margin-bottom: 24px;
     border: 1px solid #000000;
     border-radius: 5px;
     position: relative;
     padding: 15px 30px;
-}
-
-.formGroup label {
+  }
+  
+  .formGroup label {
     font-weight: 400;
     font-size: 0.8rem;
     letter-spacing: 2%;
@@ -23,15 +24,15 @@ html {
     left: 30.38px;
     top: -12px;
     background-color: #fff;
-}
-
-.formGroup label span {
+  }
+  
+  .formGroup label span {
     color: #FF0004;
-}
-
-.formGroup input,
-.formGroup select,
-.formGroup textarea {
+  }
+  
+  .formGroup input,
+  .formGroup select,
+  .formGroup textarea {
     box-sizing: border-box;
     width: 100%;
     border: none;
@@ -40,36 +41,36 @@ html {
     font-weight: 500;
     font-size: 1.2rem;
     letter-spacing: 2%;
-}
-
-.formGroup select {
+  }
+  
+  .formGroup select {
     appearance: none;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23333' d='M10.293 3.293L6 7.586 1.707 3.293A1 1 0 00.293 4.707l5 5a1 1 0 001.414 0l5-5a1 1 0 10-1.414-1.414z'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 10px center;
     padding-right: 30px;
-}
-
-.formGroup textarea {
+  }
+  
+  .formGroup textarea {
     min-height: 100px;
     resize: vertical;
-}
-
-.max-width {
+  }
+  
+  .max-width {
     max-width: 1440px;
-}
-
-.container-fluid {
+  }
+  
+  .container-fluid {
     padding: 0;
-}
-
-.app {
+  }
+  
+  .app {
     display: flex;
     height: 100vh;
     gap: 43px;
-}
-
-.sidebar {
+  }
+  
+  .sidebar {
     width: 346px;
     background: #295860;
     color: white;
@@ -80,67 +81,110 @@ html {
     align-items: center;
     border-radius: 24px;
     min-height: 100vh;
-}
-
-.logo {
+    height: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+    transition: transform 0.3s ease-in-out;
+  }
+  
+  .sidebar.open {
+    transform: translateX(0);
+  }
+  
+  .sidebar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+  }
+  
+  .logo {
     width: 129px;
     height: 86px;
-    object-fit: cover;
-}
-
-.sidebar nav {
+    object-fit: contain;
+  }
+  
+  .sidebar-toggle {
+    display: none; /* Hidden on desktop */
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 10px;
+  }
+  
+  .sidebar nav {
     flex: 1;
     width: 100%;
     display: flex;
     flex-direction: column;
     gap: 10px;
     overflow-y: auto;
-}
-
-.sidebar a {
+    max-height: calc(100% - 300px);
+  }
+  
+  .sidebar a {
     color: white;
     text-decoration: none;
     padding: 20px 26px;
-    display: block;
+    display: flex;
     font-weight: 400;
     font-size: 1rem;
     letter-spacing: 0px;
     border-radius: 4px;
     box-sizing: border-box;
-    display: flex;
     flex-direction: row;
     gap: 30px;
-}
-
-.sidebar a img {
+    align-items: center;
+  }
+  
+  .sidebar a img {
     width: 31px;
-}
-
-.sidebar a:hover {
+  }
+  
+  .sidebar a:hover {
     background: #FFFFFF59;
     border: 1px solid #FFFFFF1A;
     backdrop-filter: blur(51px);
     box-sizing: border-box;
-}
-
-.sidebar .active {
+  }
+  
+  .sidebar .active {
     background: #FFFFFF59;
     border: 1px solid #FFFFFF1A;
     backdrop-filter: blur(51px);
     box-sizing: border-box;
-}
-
-.logout {
+  }
+  
+  .logout {
     margin-top: auto;
-}
-
-.content {
+  }
+  
+  .content {
     flex: 1;
     padding: 20px;
     overflow-x: auto;
-}
-
-.manufactureForm {
+    margin-left: 346px; /* Matches sidebar width */
+  }
+  
+  .mobile-toggle {
+    display: none; /* Hidden on desktop */
+    background: #295860;
+    color: white;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    z-index: 1100;
+  }
+  
+  /* Remaining styles unchanged until ManageCars section */
+  .manufactureForm {
     background-color: white;
     padding: 15px 30px 30px 30px;
     border-radius: 10px;
@@ -148,42 +192,42 @@ html {
     max-width: 355px;
     display: flex;
     flex-direction: column;
-}
-
-.screenHeading {
+  }
+  
+  .screenHeading {
     margin: 0;
     font-weight: 600;
     font-size: 1.5rem;
     letter-spacing: 2%;
-    margin-bottom: 1;
-}
-
-.screenSubHeading {
+    margin-bottom: 1px;
+  }
+  
+  .screenSubHeading {
     font-weight: 400;
     font-size: 0.7rem;
     letter-spacing: 0%;
     margin: 0;
     margin-bottom: 31px;
-}
-
-.manufactureForm button[type="submit"] {
+  }
+  
+  .manufactureForm button[type="submit"] {
     background-color: #295860;
     padding: 16px 0px;
     width: 100%;
     border-radius: 5px;
     border: none;
     color: #fff;
-}
-
-.fileUploadButton {
+  }
+  
+  .fileUploadButton {
     cursor: pointer;
     padding: 10px;
     background-color: #f8f8f8;
     border-radius: 5px;
     text-align: center;
-}
-
-.cancelBtn {
+  }
+  
+  .cancelBtn {
     background-color: grey;
     padding: 16px 0px;
     width: 100%;
@@ -191,116 +235,115 @@ html {
     border: none;
     color: #fff;
     margin-top: 10px;
-}
-
-.currentLogoContainer {
+  }
+  
+  .currentLogoContainer {
     position: relative;
     width: 100%;
     height: 150px;
-}
-
-
-.currentLogo {
+  }
+  
+  .currentLogo {
     width: 100%;
     height: 100%;
     object-fit: contain;
-}
-
-.position-relative {
+  }
+  
+  .position-relative {
     position: relative;
-}
-
-.position-absolute {
+  }
+  
+  .position-absolute {
     position: absolute;
     top: 0;
     right: 0;
     cursor: pointer;
-}
-
-.card-img-top {
+  }
+  
+  .card-img-top {
     height: 200px;
     object-fit: cover;
-}
-
-.noLogoPlaceholder {
+  }
+  
+  .noLogoPlaceholder {
     height: 200px;
     background-color: #f0f0f0;
     display: flex;
     justify-content: center;
     align-items: center;
-}
-
-.cursor-pointer {
+  }
+  
+  .cursor-pointer {
     cursor: pointer;
-}
-
-.allInputsWrapper {
+  }
+  
+  .allInputsWrapper {
     max-width: 670px;
     box-shadow: 0px 0px 20px 0px #0000000D;
     padding: 33px;
     border-radius: 12px;
-}
-
-.addCarForm {
+  }
+  
+  .addCarForm {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 0px 20px;
     border-radius: 12px;
-}
-
-.checkboxesContainer {
+  }
+  
+  .checkboxesContainer {
     display: flex;
     flex-direction: row;
     gap: 15px;
     margin-bottom: 25px;
     flex-wrap: wrap;
-}
-
-.checkboxBLock {
+  }
+  
+  .checkboxBLock {
     display: flex;
     flex-direction: row;
     gap: 8px;
     align-items: center;
-}
-
-.checkboxBLock input[type="checkbox"] {
+  }
+  
+  .checkboxBLock input[type="checkbox"] {
     width: 21px;
     height: 21px;
-}
-
-.accordion {
+  }
+  
+  .accordion {
     max-width: 355px;
-}
-
-.addCarHeader {
+  }
+  
+  .addCarHeader {
     display: flex;
     flex-direction: row;
     gap: 20px;
     align-items: center;
-}
-
-.addCarHeader p {
+  }
+  
+  .addCarHeader p {
     margin: 0;
     margin-bottom: 10px;
     color: #868686;
     cursor: pointer;
     transition: all 0.2s ease-in-out;
-}
-
-.addCarHeader p.active {
+  }
+  
+  .addCarHeader p.active {
     color: #295860;
     border-bottom: 3px solid #295860;
-}
-
-.carMediaSecHeading {
+  }
+  
+  .carMediaSecHeading {
     font-weight: 600;
     font-size: 0.85rem;
     line-height: 20.4px;
     letter-spacing: 0%;
     color: #181A20;
-}
-
-.dropZone {
+  }
+  
+  .dropZone {
     width: 100%;
     padding: 45px 20px 38.44px 20px;
     border: 2px dashed #295860;
@@ -309,17 +352,17 @@ html {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-}
-
-.dragDropText {
+  }
+  
+  .dragDropText {
     margin-top: 22.8px;
     margin-bottom: 38px;
     font-weight: 600;
     font-size: 0.85rem;
     letter-spacing: 0%;
-}
-
-.uploadCarMediaBtn {
+  }
+  
+  .uploadCarMediaBtn {
     padding: 7.78px 14.11px;
     border: 1px solid #295860;
     border-radius: 12px;
@@ -327,34 +370,34 @@ html {
     color: #295860;
     font-weight: 600;
     font-size: 0.75rem;
-}
-
-.uploadCarMediaBtn span {
+  }
+  
+  .uploadCarMediaBtn span {
     margin-left: 10px;
-}
-
-.imageGrid {
+  }
+  
+  .imageGrid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 7px;
     margin: 20px 0px;
-}
-
-.imageCard {
+  }
+  
+  .imageCard {
     max-width: 224px;
     height: 119px;
     border-radius: 12px;
     position: relative;
-}
-
-.imageCard img {
+  }
+  
+  .imageCard img {
     width: 100%;
     height: 100%;
     object-fit: contain;
     border-radius: 12px;
-}
-
-.removeImageButton {
+  }
+  
+  .removeImageButton {
     position: absolute;
     top: 5px;
     left: 5px;
@@ -366,19 +409,21 @@ html {
     justify-content: center;
     align-items: center;
     cursor: pointer;
-}
-
-.removeImageButton i {
+  }
+  
+  .removeImageButton i {
     font-size: 15.9px;
-}
-
-.addCarButtonWrapper {
+  }
+  
+  .addCarButtonWrapper {
     display: flex;
     justify-content: flex-end;
     gap: 8px;
-}
-
-.createBtn {
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  
+  .createBtn {
     padding: 16px 84.5px;
     background: #295860;
     border: none;
@@ -386,9 +431,9 @@ html {
     color: #fff;
     font-weight: 600;
     font-size: 0.75rem;
-}
-
-.cancelFormBtn {
+  }
+  
+  .cancelFormBtn {
     padding: 16px 84.5px;
     background: transparent;
     border: 1px solid #295860;
@@ -396,43 +441,41 @@ html {
     color: #295860;
     font-weight: 600;
     font-size: 0.75rem;
-}
-
-/* Add to your CSS file */
-.w-md-editor-toolbar {
+  }
+  
+  .w-md-editor-toolbar {
     background: #f5f5f5;
     border-radius: 4px 4px 0 0;
-}
-
-.w-md-editor-content {
+  }
+  
+  .w-md-editor-content {
     border-radius: 0 0 4px 4px;
-}
-
-.w-md-editor {
+  }
+  
+  .w-md-editor {
     box-shadow: none;
     border: 1px solid #ddd;
-}
-
-
-.admin-header {
+  }
+  
+  .admin-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 20px;
     flex-wrap: wrap;
-}
-
-.admin-header h1 {
+  }
+  
+  .admin-header h1 {
     font-size: 24px;
     color: #333;
-}
-
-.admin-header p {
+  }
+  
+  .admin-header p {
     font-size: 14px;
     color: #666;
-}
-
-.download-btn {
+  }
+  
+  .download-btn {
     background: #BD925c;
     color: white;
     border: none;
@@ -441,24 +484,24 @@ html {
     cursor: pointer;
     font-weight: 600;
     font-size: 0.75rem;
-}
-
-.adminRenderTable {
+  }
+  
+  .adminRenderTable {
     padding: 20px;
     border-radius: 12px;
     box-shadow: 0px 0px 20px 0px #0000000D;
     background-color: white;
-}
-
-.admin-actions {
+  }
+  
+  .admin-actions {
     margin-bottom: 28px;
     display: flex;
     flex-direction: row;
     gap: 8px;
     flex-wrap: wrap;
-}
-
-.action-btn {
+  }
+  
+  .action-btn {
     border: none;
     cursor: pointer;
     background: #BDBFC4;
@@ -466,31 +509,30 @@ html {
     transition: background 0.3s;
     padding: 16px 59px;
     border-radius: 5px;
-    cursor: pointer;
     font-weight: 600;
     font-size: 0.75rem;
-}
-
-.action-btn.active {
+  }
+  
+  .action-btn.active {
     background: #295860;
-}
-
-.action-btn:hover {
+  }
+  
+  .action-btn:hover {
     background: #295860;
-}
-
-.table-container {
+  }
+  
+  .table-container {
     overflow-x: auto;
-}
-
-.data-table {
+  }
+  
+  .data-table {
     width: 100%;
     border-collapse: collapse;
     margin-bottom: 20px;
-}
-
-.data-table th,
-.data-table td {
+  }
+  
+  .data-table th,
+  .data-table td {
     padding: 12px;
     text-align: left;
     border-bottom: 1px solid #DDDDDD;
@@ -499,30 +541,344 @@ html {
     font-size: 0.9rem;
     line-height: 34px;
     letter-spacing: -2%;
-}
-
-.data-table th {
+  }
+  
+  .data-table th {
     background: #F7F7F7;
-    font-weight: bold;
     font-weight: 600;
     font-size: 0.9rem;
     color: #181A20;
     border: none;
-}
-
-.image-cell a{
+  }
+  
+  .image-cell a {
     font-size: 0.6rem;
     color: #757676;
     font-weight: 400;
-}
-
-.table-container {
-    overflow-x: auto; /* Enables horizontal scrolling */
-    max-width: 1200px; /* Set your desired max-width */
+  }
+  
+  .table-container {
+    overflow-x: auto;
+    max-width: 1200px;
   }
   
   .data-table {
     width: 100%;
     border-collapse: collapse;
-    min-width: 800px; /* Ensures table doesn't shrink too much, adjust as needed */
+    min-width: 800px;
+  }
+  
+  /* Manage Cars Section */
+  .manageCarsSection {
+    padding: 20px;
+    max-width: 1440px;
+    margin: 0 auto;
+  }
+  
+  .manageCarsHeader {
+    margin-bottom: 20px;
+  }
+  
+  .manageCarsHeading {
+    font-weight: 600;
+    font-size: 1.5rem;
+    margin: 0;
+  }
+  
+  .manageCarsSubHeading {
+    font-weight: 400;
+    font-size: 0.7rem;
+    color: #666;
+    margin: 5px 0 0;
+  }
+  
+  /* Filters Container */
+  .filtersContainer {
+    margin-bottom: 20px;
+  }
+  
+  .searchInput {
+    width: 100%;
+    padding: 10px;
+    font-size: 0.9rem;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    margin-bottom: 10px;
+  }
+  
+  .scrollableFilters {
+    display: flex;
+    gap: 10px;
+    max-width: 800px;
+  }
+  
+  .filterSelect {
+    flex: 1;
+    min-width: 150px;
+    padding: 10px;
+    font-size: 0.9rem;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23333' d='M10.293 3.293L6 7.586 1.707 3.293A1 1 0 00.293 4.707l5 5a1 1 0 001.414 0l5-5a1 1 0 10-1.414-1.414z'/%3E%3C/svg%3E") no-repeat right 10px center;
+  }
+  
+  /* Car Cards */
+  .allCarsWrapper {
+    padding: 0;
+  }
+  
+  .carCardHolder {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+    margin-bottom: 20px;
+  }
+  
+  .cardLink {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.2s;
+  }
+  
+  .cardLink:hover {
+    transform: translateY(-5px);
+  }
+  
+  .cardBody {
+    padding: 15px;
+  }
+  
+  .cardHeader {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .carTitle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .manufacturerLogo img {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+  }
+  
+  .manufacturerInfo h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 0;
+  }
+  
+  .fuelType {
+    font-size: 0.7rem;
+    color: #757676;
+    margin: 0;
+  }
+  
+  .pricingInfo {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .priceContainer {
+    text-align: left;
+  }
+  
+  .price {
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 0;
+  }
+  
+  .priceContainer span {
+    font-size: 0.7rem;
+    text-decoration: line-through;
+    color: #999;
+  }
+  
+  .monthlyLease {
+    font-size: 0.7rem;
+    color: #295860;
+    margin: 5px 0 0;
+  }
+  
+  .arrowButton img {
+    width: 20px;
+  }
+  
+  .carThumbnailContainer img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 8px;
+  }
+  
+  .cardDetailsContainer {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 10px;
+    margin-top: 10px;
+  }
+  
+  .singleInfoBlock {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  
+  .singleInfoBlock img {
+    width: 20px;
+  }
+  
+  .singleInfoValue {
+    font-size: 0.7rem;
+    color: #757676;
+    margin: 0;
+  }
+  
+  /* Pagination */
+  .pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+    flex-wrap: wrap;
+  }
+  
+  .pagination button {
+    padding: 8px 12px;
+    border: none;
+    background: #f0f0f0;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.8rem;
+  }
+  
+  .pagination button.active {
+    background: #295860;
+    color: white;
+  }
+  
+  .pagination-arrow {
+    background: none;
+  }
+  
+  .pagination-arrow img {
+    width: 20px;
+  }
+  
+  .pagination-arrow.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  
+  /* Responsive Adjustments */
+  @media (max-width: 768px) {
+    html {
+      font-size: 16px;
+    }
+  
+    .app {
+      flex-direction: column;
+      gap: 0;
+    }
+  
+    .sidebar {
+      width: 100%;
+      max-width: 280px; /* Slightly narrower on mobile */
+      border-radius: 0;
+      padding: 20px;
+      transform: translateX(-100%);
+      height: 100%;
+    }
+  
+    .sidebar.open {
+      transform: translateX(0);
+    }
+  
+    .sidebar-toggle {
+      display: block; /* Show toggle button on mobile */
+    }
+  
+    .content {
+      margin-left: 0;
+      padding: 10px;
+      padding-top: 60px; /* Space for mobile toggle button */
+    }
+  
+    .mobile-toggle {
+      display: block; /* Show on mobile */
+    }
+  
+    .manageCarsSection {
+      padding: 10px;
+    }
+  
+    .carCardHolder {
+      grid-template-columns: 1fr;
+    }
+  
+    .cardHeader {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  
+    .pricingInfo {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 5px;
+    }
+  
+    .filterSelect {
+      min-width: 100%;
+      margin-bottom: 10px;
+    }
+    .addCarButtonWrapper{
+        justify-content: center;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .cardDetailsContainer {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  
+    .pagination button {
+      padding: 6px 10px;
+      font-size: 0.7rem;
+    }
+  
+    .pagination-arrow img {
+      width: 16px;
+    }
+  
+    .admin-actions {
+      flex-direction: column;
+      align-items: stretch;
+    }
+  
+    .action-btn {
+      padding: 12px;
+    }
+  
+    .download-btn {
+      padding: 12px;
+      width: 100%;
+    }
+  
+    .sidebar a {
+      padding: 15px 20px; /* Slightly smaller padding on very small screens */
+      font-size: 0.9rem;
+    }
+  
+    .sidebar a img {
+      width: 25px; /* Smaller icons */
+    }
   }

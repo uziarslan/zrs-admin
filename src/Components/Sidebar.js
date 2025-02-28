@@ -7,7 +7,7 @@ import group from "../Assets/icons/group.svg";
 import notepad from "../Assets/icons/notepad.svg";
 import logout from "../Assets/icons/logout.svg";
 
-const Sidebar = ({ onSelectScreen, currentScreen }) => {
+const Sidebar = ({ onSelectScreen, currentScreen, isOpen, toggleSidebar }) => {
   const menuItems = [
     { icon: manage, text: "Manufacturer", screen: "addManufacturer" },
     { icon: manage, text: "Vehicle Type", screen: "vehicleType" },
@@ -19,8 +19,13 @@ const Sidebar = ({ onSelectScreen, currentScreen }) => {
   ];
 
   return (
-    <div className="sidebar">
-      <img src={logo} alt="Logo" className="logo" />
+    <div className={`sidebar ${isOpen ? "open" : ""}`}>
+      <div className="sidebar-header">
+        <img src={logo} alt="Logo" className="logo" />
+        <button className="sidebar-toggle" onClick={toggleSidebar}>
+          {isOpen ? "✕" : "☰"}
+        </button>
+      </div>
       <nav>
         {menuItems.map((item, index) => (
           <a
@@ -30,6 +35,7 @@ const Sidebar = ({ onSelectScreen, currentScreen }) => {
             onClick={(e) => {
               e.preventDefault();
               onSelectScreen(item.screen);
+              if (window.innerWidth <= 768) toggleSidebar(); // Close sidebar on mobile after selection
             }}
           >
             <img src={item.icon} alt={item.text} />
