@@ -1,11 +1,13 @@
-import React from "react";
+import React, { useContext } from "react";
+import { Link } from "react-router-dom";
 import logo from "../Assets/images/logo.png";
 import manage from "../Assets/icons/manage.svg";
 import add from "../Assets/icons/add.svg";
 import carTab from "../Assets/icons/car-tab.svg";
 import group from "../Assets/icons/group.svg";
 import notepad from "../Assets/icons/notepad.svg";
-import logout from "../Assets/icons/logout.svg";
+import logoutIcon from "../Assets/icons/logout.svg";
+import { AuthContext } from "../Context/AuthContext";
 
 const Sidebar = ({ onSelectScreen, currentScreen, isOpen, toggleSidebar }) => {
   const menuItems = [
@@ -17,6 +19,8 @@ const Sidebar = ({ onSelectScreen, currentScreen, isOpen, toggleSidebar }) => {
     { icon: group, text: "Users", screen: "users" },
     { icon: notepad, text: "Blog Upload", screen: "blogUpload" },
   ];
+
+  const { logout } = useContext(AuthContext);
 
   return (
     <div className={`sidebar ${isOpen ? "open" : ""}`}>
@@ -43,10 +47,10 @@ const Sidebar = ({ onSelectScreen, currentScreen, isOpen, toggleSidebar }) => {
           </a>
         ))}
       </nav>
-      <a href="#" className="logout">
-        <img src={logout} alt="Logout" />
+      <Link onClick={logout} className="logout">
+        <img src={logoutIcon} alt="Logout" />
         <span>Logout</span>
-      </a>
+      </Link>
     </div>
   );
 };
