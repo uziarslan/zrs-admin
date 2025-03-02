@@ -32,9 +32,9 @@ const Sidebar = ({ onSelectScreen, currentScreen, isOpen, toggleSidebar }) => {
       </div>
       <nav>
         {menuItems.map((item, index) => (
-          <a
+          <Link
             key={index}
-            href="#"
+            to="#"
             className={currentScreen === item.screen ? "active" : ""}
             onClick={(e) => {
               e.preventDefault();
@@ -44,7 +44,7 @@ const Sidebar = ({ onSelectScreen, currentScreen, isOpen, toggleSidebar }) => {
           >
             <img src={item.icon} alt={item.text} />
             <span>{item.text}</span>
-          </a>
+          </Link>
         ))}
       </nav>
       <Link onClick={logout} className="logout">
