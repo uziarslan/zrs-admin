@@ -1,8 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom"; // For navigation after update/cancel
 import axiosInstance from "../services/axiosInstance";
-import redirect from "../Assets/icons/redirect.svg";
-import heart from "../Assets/icons/heart.svg";
 import mileage from "../Assets/icons/mileage.svg";
 import color from "../Assets/icons/color.svg";
 import calender from "../Assets/icons/calender.svg";
@@ -29,7 +26,6 @@ export default function ManageCars() {
   const [searchKeyword, setSearchKeyword] = useState(""); // State for search keyword
   const [selectedCar, setSelectedCar] = useState(null); // State for the car being edited
   const itemsPerPage = 6; // Matches 2x3 grid in image
-  const navigate = useNavigate(); // For navigation after update/cancel
 
   // Fetch all cars from the backend (no pagination in backend)
   const fetchAllCars = async () => {
@@ -250,9 +246,8 @@ export default function ManageCars() {
         <button
           onClick={() => handlePageChange(currentPage + 1)}
           disabled={currentPage === totalPages}
-          className={`pagination-arrow ${
-            currentPage === totalPages ? "disabled" : ""
-          }`}
+          className={`pagination-arrow ${currentPage === totalPages ? "disabled" : ""
+            }`}
           aria-label="Next page"
         >
           <img src={arrowRight} alt="Next page" />

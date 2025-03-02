@@ -15,7 +15,7 @@ const Users = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [activeTab, setActiveTab] = useState("sellCar");
   const [selectedImages, setSelectedImages] = useState(null);
-  const itemsPerPage = 5;
+  const itemsPerPage = 6;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -64,17 +64,31 @@ const Users = () => {
 
     const pages = [];
     const maxVisiblePages = 5;
-    const startPage = Math.max(2, currentPage - 2);
-    const endPage = Math.min(totalPages - 1, currentPage + 2);
+    let startPage = Math.max(2, currentPage - Math.floor(maxVisiblePages / 2));
+    let endPage = Math.min(totalPages - 1, currentPage + Math.floor(maxVisiblePages / 2));
 
+    // Adjust startPage and endPage if we're at the extremes
+    if (currentPage <= Math.floor(maxVisiblePages / 2) + 1) {
+      startPage = 2;
+      endPage = Math.min(maxVisiblePages, totalPages - 1);
+    } else if (currentPage >= totalPages - Math.floor(maxVisiblePages / 2)) {
+      startPage = Math.max(2, totalPages - maxVisiblePages + 1);
+      endPage = totalPages - 1;
+    }
+
+    // Always show the first page
     pages.push(
       <button key={1} onClick={() => handlePageChange(1)} className={currentPage === 1 ? "active" : ""}>
         1
       </button>
     );
 
-    if (startPage > 2) pages.push(<span key="start-ellipsis">...</span>);
-    
+    // Show ellipsis if startPage is not immediately after the first page
+    if (startPage > 2) {
+      pages.push(<span key="start-ellipsis">...</span>);
+    }
+
+    // Show the range of pages around the current page
     for (let i = startPage; i <= endPage; i++) {
       pages.push(
         <button key={i} onClick={() => handlePageChange(i)} className={currentPage === i ? "active" : ""}>
@@ -83,8 +97,12 @@ const Users = () => {
       );
     }
 
-    if (endPage < totalPages - 1) pages.push(<span key="end-ellipsis">...</span>);
-    
+    // Show ellipsis if endPage is not immediately before the last page
+    if (endPage < totalPages - 1) {
+      pages.push(<span key="end-ellipsis">...</span>);
+    }
+
+    // Always show the last page if there's more than one page
     if (totalPages > 1) {
       pages.push(
         <button key={totalPages} onClick={() => handlePageChange(totalPages)} className={currentPage === totalPages ? "active" : ""}>
@@ -136,14 +154,14 @@ const Users = () => {
       <td>{item.mobileNumber || "N/A"}</td>
       <td>
         {activeTab === "finance" ? `Finance query for ${item.manufacturer} ${item.vehicleType}` :
-         activeTab === "sellCar" ? item.description || `Sell car query for ${item.manufacturer} ${item.modelName}` :
-         activeTab === "contactUs" ? item.message || "N/A" :
-         `${item.carId.manufacturerId.brandName} ${item.carId.vehicleTypeId.modelName}`}
+          activeTab === "sellCar" ? item.description || `Sell car query for ${item.manufacturer} ${item.modelName}` :
+            activeTab === "contactUs" ? item.message || "N/A" :
+              `${item.carId.manufacturerId.brandName} ${item.carId.vehicleTypeId.modelName}`}
       </td>
       {activeTab === "testDrive" && (
         <td>
-          {item.date && item.time 
-            ? `${new Date(item.date).toLocaleDateString()} ${item.time}` 
+          {item.date && item.time
+            ? `${new Date(item.date).toLocaleDateString()} ${item.time}`
             : "N/A"}
         </td>
       )}
