@@ -18,6 +18,7 @@ const Sidebar = ({ onSelectScreen, currentScreen, isOpen, toggleSidebar }) => {
     { icon: carTab, text: "Manage Cars", screen: "manageCars" },
     { icon: group, text: "Users", screen: "users" },
     { icon: notepad, text: "Blog Upload", screen: "blogUpload" },
+    { icon: notepad, text: "Blogs", screen: "blogs" },
   ];
 
   const { logout } = useContext(AuthContext);

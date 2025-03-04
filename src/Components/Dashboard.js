@@ -6,6 +6,8 @@ import AddCar from "./AddCar";
 import AddTrim from "./AddTrim";
 import ManageCars from "./ManageCars";
 import Users from "./Users";
+import AddBlog from "./AddBlog";
+import Blogs from "./Blogs";
 
 function Dashboard() {
   const [currentScreen, setCurrentScreen] = useState("addManufacturer");
@@ -34,7 +36,9 @@ function Dashboard() {
       case "users":
         return <Users />;
       case "blogUpload":
-        return <div>Blog Upload Screen</div>;
+        return <AddBlog />;
+      case "blogs":
+        return <Blogs />;
       default:
         return <AddManufacturer />;
     }
@@ -49,7 +53,7 @@ function Dashboard() {
         toggleSidebar={toggleSidebar}
       />
       <div className="content">
-      {!sidebarOpen && (
+        {!sidebarOpen && (
           <button className="mobile-toggle" onClick={toggleSidebar}>
             ☰
           </button>
