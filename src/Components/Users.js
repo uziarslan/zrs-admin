@@ -10,7 +10,8 @@ const Users = () => {
     finance: [],
     sellCar: [],
     contactUs: [],
-    testDrive: []
+    testDrive: [],
+    buyNow: []
   });
   const [currentPage, setCurrentPage] = useState(1);
   const [activeTab, setActiveTab] = useState("sellCar");
@@ -21,21 +22,26 @@ const Users = () => {
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        const [financeRes, sellCarRes, contactUsRes, testDriveRes] = await Promise.all([
+        const [financeRes, sellCarRes, contactUsRes, testDriveRes, buyNowRes] = await Promise.all([
           axiosInstance.get("/api/v1/finance-eligibility"),
           axiosInstance.get("/api/v1/sell-car"),
           axiosInstance.get("/api/v1/contact-us"),
-          axiosInstance.get("/api/v1/test-drives")
+          axiosInstance.get("/api/v1/test-drives"),
+          axiosInstance.get("/api/v1/buy-car")
         ]);
 
-        setData({
-          finance: financeRes.data || [],
-          sellCar: sellCarRes.data || [],
-          contactUs: contactUsRes.data || [],
-          testDrive: testDriveRes.data || []
-        });
+        const newData = {
+          finance: financeRes.data?.data || financeRes.data || [],
+          sellCar: sellCarRes.data?.data || sellCarRes.data || [],
+          contactUs: contactUsRes.data?.data || contactUsRes.data || [],
+          testDrive: testDriveRes.data?.data || testDriveRes.data || [],
+          buyNow: buyNowRes.data?.data || buyNowRes.data || []
+        };
+
+        setData(newData);
       } catch (err) {
         console.error("Error fetching data:", err);
+        console.error("Error response:", err.response?.data);
       } finally {
         setIsLoading(false);
       }
@@ -45,7 +51,7 @@ const Users = () => {
   }, [setIsLoading]);
 
   const { currentData, totalPages } = useMemo(() => {
-    const activeData = data[activeTab];
+    const activeData = data[activeTab] || [];
     const total = Math.max(1, Math.ceil(activeData.length / itemsPerPage));
     const start = (currentPage - 1) * itemsPerPage;
     const end = start + itemsPerPage;
@@ -67,7 +73,6 @@ const Users = () => {
     let startPage = Math.max(2, currentPage - Math.floor(maxVisiblePages / 2));
     let endPage = Math.min(totalPages - 1, currentPage + Math.floor(maxVisiblePages / 2));
 
-    // Adjust startPage and endPage if we're at the extremes
     if (currentPage <= Math.floor(maxVisiblePages / 2) + 1) {
       startPage = 2;
       endPage = Math.min(maxVisiblePages, totalPages - 1);
@@ -76,19 +81,14 @@ const Users = () => {
       endPage = totalPages - 1;
     }
 
-    // Always show the first page
     pages.push(
       <button key={1} onClick={() => handlePageChange(1)} className={currentPage === 1 ? "active" : ""}>
         1
       </button>
     );
 
-    // Show ellipsis if startPage is not immediately after the first page
-    if (startPage > 2) {
-      pages.push(<span key="start-ellipsis">...</span>);
-    }
+    if (startPage > 2) pages.push(<span key="start-ellipsis">...</span>);
 
-    // Show the range of pages around the current page
     for (let i = startPage; i <= endPage; i++) {
       pages.push(
         <button key={i} onClick={() => handlePageChange(i)} className={currentPage === i ? "active" : ""}>
@@ -97,12 +97,8 @@ const Users = () => {
       );
     }
 
-    // Show ellipsis if endPage is not immediately before the last page
-    if (endPage < totalPages - 1) {
-      pages.push(<span key="end-ellipsis">...</span>);
-    }
+    if (endPage < totalPages - 1) pages.push(<span key="end-ellipsis">...</span>);
 
-    // Always show the last page if there's more than one page
     if (totalPages > 1) {
       pages.push(
         <button key={totalPages} onClick={() => handlePageChange(totalPages)} className={currentPage === totalPages ? "active" : ""}>
@@ -139,43 +135,47 @@ const Users = () => {
         <th>Email Address</th>
         <th>Mobile Number</th>
         {activeTab === "sellCar" && <th>Description</th>}
-        {activeTab === "testDrive" && <th>Car</th>}
-        {activeTab === "testDrive" && <th>Date & Time</th>} {/* Updated header */}
+        {(activeTab === "testDrive" || activeTab === "buyNow") && <th>Car</th>}
+        {activeTab === "testDrive" && <th>Date & Time</th>}
         {(activeTab === "finance" || activeTab === "contactUs") && <th>Query</th>}
         {activeTab === "sellCar" && <th>Image</th>}
       </tr>
     </thead>
   );
 
-  const renderTableRow = (item) => (
-    <tr key={item._id}>
-      <td>{item.fullName || `${item.firstName} ${item.lastName}` || "N/A"}</td>
-      <td>{item.email || "N/A"}</td>
-      <td>{item.mobileNumber || "N/A"}</td>
-      <td>
-        {activeTab === "finance" ? `Finance query for ${item.manufacturer} ${item.vehicleType}` :
-          activeTab === "sellCar" ? item.description || `Sell car query for ${item.manufacturer} ${item.modelName}` :
-            activeTab === "contactUs" ? item.message || "N/A" :
-              `${item.carId.manufacturerId.brandName} ${item.carId.vehicleTypeId.modelName}`}
-      </td>
-      {activeTab === "testDrive" && (
+  const renderTableRow = (item) => {
+    return (
+      <tr key={item._id}>
+        <td>{item.fullName || `${item.firstName} ${item.lastName}` || "N/A"}</td>
+        <td>{item.email || "N/A"}</td>
+        <td>{item.mobileNumber || "N/A"}</td>
         <td>
-          {item.date && item.time
-            ? `${new Date(item.date).toLocaleDateString()} ${item.time}`
-            : "N/A"}
+          {activeTab === "finance" ? `Finance query for ${item.manufacturer} ${item.vehicleType}` :
+            activeTab === "sellCar" ? item.description || `Sell car query for ${item.manufacturer} ${item.modelName}` :
+              activeTab === "contactUs" ? item.message || "N/A" :
+                activeTab === "buyNow" || activeTab === "testDrive" ?
+                  `${item.carId?.manufacturerId?.brandName || "N/A"} ${item.carId?.vehicleTypeId?.modelName || "N/A"}` :
+                  "N/A"}
         </td>
-      )}
-      {activeTab === "sellCar" && (
-        <td className="image-cell">
-          {item.images?.length > 0 ? (
-            <a href="#!" onClick={() => setSelectedImages(item.images)}>
-              Images({item.images.length})
-            </a>
-          ) : "No image"}
-        </td>
-      )}
-    </tr>
-  );
+        {activeTab === "testDrive" && (
+          <td>
+            {item.date && item.time
+              ? `${new Date(item.date).toLocaleDateString()} ${item.time}`
+              : "N/A"}
+          </td>
+        )}
+        {activeTab === "sellCar" && (
+          <td className="image-cell">
+            {item.images?.length > 0 ? (
+              <a href="#!" onClick={() => setSelectedImages(item.images)}>
+                Images({item.images.length})
+              </a>
+            ) : "No image"}
+          </td>
+        )}
+      </tr>
+    );
+  };
 
   return (
     <div className="admin-panel">
@@ -190,7 +190,7 @@ const Users = () => {
       </div>
       <div className="adminRenderTable">
         <div className="admin-actions">
-          {["sellCar", "testDrive", "finance", "contactUs"].map(tab => (
+          {["sellCar", "testDrive", "finance", "contactUs", "buyNow"].map(tab => (
             <button
               key={tab}
               className={`action-btn ${activeTab === tab ? "active" : ""}`}
@@ -204,10 +204,14 @@ const Users = () => {
           ))}
         </div>
         <div className="table-container">
-          <table className="data-table">
-            {renderTableHeader()}
-            <tbody>{currentData.map(renderTableRow)}</tbody>
-          </table>
+          {currentData.length > 0 ? (
+            <table className="data-table">
+              {renderTableHeader()}
+              <tbody>{currentData.map(renderTableRow)}</tbody>
+            </table>
+          ) : (
+            <p>No data available for {activeTab}</p>
+          )}
         </div>
       </div>
       {renderPagination()}

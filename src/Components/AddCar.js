@@ -3,7 +3,6 @@ import axiosInstance from "../services/axiosInstance";
 import Flash from "./Flash";
 import { AuthContext } from "../Context/AuthContext";
 import uploadIcon from "../Assets/icons/upload.svg";
-import arrowIcon from "../Assets/icons/arrow.svg";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 
@@ -29,7 +28,7 @@ const AddCar = () => {
     engine: "",
     testDrive: "yes",
     featured: "no",
-    saleStatus: "",
+    saleStatus: "for-sale",
     discountedPrice: "",
     servicePackage: "Available",
     specifications: {},
@@ -40,15 +39,14 @@ const AddCar = () => {
   const [showCarInfo, setShowCarInfo] = useState(true);
   const [previewImages, setPreviewImages] = useState([]);
   const { setIsLoading } = useContext(AuthContext);
+  const [dragIndex, setDragIndex] = useState(null); // Track the dragged item index
 
   // Fetch manufacturers, vehicle types, and trims
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        const manufacturersResponse = await axiosInstance.get(
-          "/api/v1/fetch-logos"
-        );
+        const manufacturersResponse = await axiosInstance.get("/api/v1/fetch-logos");
         if (manufacturersResponse.status === 200) {
           setManufacturers(
             manufacturersResponse.data.logos.map((logo) => ({
@@ -58,16 +56,12 @@ const AddCar = () => {
           );
         }
 
-        const vehicleTypesResponse = await axiosInstance.get(
-          "/api/v1/fetch-vehicle-types"
-        );
+        const vehicleTypesResponse = await axiosInstance.get("/api/v1/fetch-vehicle-types");
         if (vehicleTypesResponse.status === 200) {
           setVehicleTypes(vehicleTypesResponse.data.vehicleTypes || []);
         }
 
-        const trimsResponse = await axiosInstance.get(
-          "/api/v1/fetch-vehicle-trims"
-        );
+        const trimsResponse = await axiosInstance.get("/api/v1/fetch-vehicle-trims");
         if (trimsResponse.status === 200) {
           setAllTrims(trimsResponse.data.trims || []);
         }
@@ -86,11 +80,7 @@ const AddCar = () => {
     setFormData((prev) => ({
       ...prev,
       [name]: value,
-      ...(name === "manufacturerId" && {
-        vehicleTypeId: "",
-        trimId: "",
-        specifications: {},
-      }),
+      ...(name === "manufacturerId" && { vehicleTypeId: "", trimId: "", specifications: {} }),
       ...(name === "vehicleTypeId" && { trimId: "", specifications: {} }),
     }));
   };
@@ -99,10 +89,7 @@ const AddCar = () => {
   const handleSpecChange = (spec, checked) => {
     setFormData((prev) => ({
       ...prev,
-      specifications: {
-        ...prev.specifications,
-        [spec]: checked,
-      },
+      specifications: { ...prev.specifications, [spec]: checked },
     }));
   };
 
@@ -115,10 +102,7 @@ const AddCar = () => {
         selectedTrim.specifications.forEach((spec) => {
           initialSpecs[spec] = true;
         });
-        setFormData((prev) => ({
-          ...prev,
-          specifications: initialSpecs,
-        }));
+        setFormData((prev) => ({ ...prev, specifications: initialSpecs }));
       }
     }
   }, [formData.trimId, allTrims]);
@@ -136,8 +120,39 @@ const AddCar = () => {
     }));
   };
 
-  // Handle drag-and-drop events
-  const handleDragOver = (e) => e.preventDefault();
+  // Drag and Drop handlers
+  const handleDragStart = (e, index) => {
+    setDragIndex(index);
+    e.dataTransfer.setData("text/plain", index); // Required for Firefox
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault(); // Necessary to allow dropping
+  };
+
+  const handleDropImage = (e, dropIndex) => {
+    e.preventDefault();
+    if (dragIndex === null || dragIndex === dropIndex) return;
+
+    const newPreviewImages = [...previewImages];
+    const newImages = [...formData.images];
+
+    // Reorder both preview and actual file arrays
+    const [draggedPreview] = newPreviewImages.splice(dragIndex, 1);
+    const [draggedImage] = newImages.splice(dragIndex, 1);
+    newPreviewImages.splice(dropIndex, 0, draggedPreview);
+    newImages.splice(dropIndex, 0, draggedImage);
+
+    setPreviewImages(newPreviewImages);
+    setFormData((prev) => ({ ...prev, images: newImages }));
+    setDragIndex(null);
+  };
+
+  const handleDragEnd = () => {
+    setDragIndex(null);
+  };
+
+  // Handle drop for upload area
   const handleDrop = (e) => {
     e.preventDefault();
     handleImageUpload(e);
@@ -145,9 +160,7 @@ const AddCar = () => {
 
   // Remove an image
   const removeImage = (indexToRemove) => {
-    setPreviewImages((prev) =>
-      prev.filter((_, index) => index !== indexToRemove)
-    );
+    setPreviewImages((prev) => prev.filter((_, index) => index !== indexToRemove));
     setFormData((prev) => ({
       ...prev,
       images: prev.images.filter((_, index) => index !== indexToRemove),
@@ -174,19 +187,14 @@ const AddCar = () => {
         }
       });
 
+      // Append images in the order they appear in the state
       formData.images.forEach((file) => {
         formDataToSend.append("images", file);
       });
 
-      const response = await axiosInstance.post(
-        "/api/v1/cars",
-        formDataToSend,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
+      const response = await axiosInstance.post("/api/v1/cars", formDataToSend, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
 
       if (response.status === 200 || response.status === 201) {
         setMessage({ success: "Car added successfully" });
@@ -208,7 +216,7 @@ const AddCar = () => {
           engine: "",
           testDrive: "yes",
           featured: "no",
-          saleStatus: "",
+          saleStatus: "for-sale",
           discountedPrice: "",
           servicePackage: "Available",
           specifications: {},
@@ -244,7 +252,7 @@ const AddCar = () => {
       engine: "",
       testDrive: "yes",
       featured: "no",
-      saleStatus: "",
+      saleStatus: "for-sale",
       discountedPrice: "",
       servicePackage: "Available",
       specifications: {},
@@ -261,16 +269,10 @@ const AddCar = () => {
       <h2 className="screenHeading">Add New Car</h2>
       <p className="screenSubHeading">We are glad to see you again!</p>
       <header className="addCarHeader">
-        <p
-          onClick={() => handleToggleSection("carInfo")}
-          className={`${showCarInfo ? "active" : ""}`}
-        >
+        <p onClick={() => handleToggleSection("carInfo")} className={`${showCarInfo ? "active" : ""}`}>
           Car Info
         </p>
-        <p
-          onClick={() => handleToggleSection("carMedia")}
-          className={`${!showCarInfo ? "active" : ""}`}
-        >
+        <p onClick={() => handleToggleSection("carMedia")} className={`${!showCarInfo ? "active" : ""}`}>
           Car Media
         </p>
       </header>
@@ -288,9 +290,7 @@ const AddCar = () => {
               >
                 <option value="">Select Manufacturer</option>
                 {manufacturers.map(({ brandName, _id }) => (
-                  <option key={_id} value={_id}>
-                    {brandName}
-                  </option>
+                  <option key={_id} value={_id}>{brandName}</option>
                 ))}
               </select>
             </div>
@@ -307,13 +307,9 @@ const AddCar = () => {
               >
                 <option value="">Select Vehicle Type</option>
                 {vehicleTypes
-                  .filter(
-                    (vt) => vt.manufacturer?._id === formData.manufacturerId
-                  )
+                  .filter((vt) => vt.manufacturer?._id === formData.manufacturerId)
                   .map((vt) => (
-                    <option key={vt._id} value={vt._id}>
-                      {vt.modelName}
-                    </option>
+                    <option key={vt._id} value={vt._id}>{vt.modelName}</option>
                   ))}
               </select>
             </div>
@@ -330,13 +326,9 @@ const AddCar = () => {
               >
                 <option value="">Select Trim</option>
                 {allTrims
-                  .filter(
-                    (trim) => trim.vehicleType?._id === formData.vehicleTypeId
-                  )
+                  .filter((trim) => trim.vehicleType?._id === formData.vehicleTypeId)
                   .map((trim) => (
-                    <option key={trim._id} value={trim._id}>
-                      {trim.trimName}
-                    </option>
+                    <option key={trim._id} value={trim._id}>{trim.trimName}</option>
                   ))}
               </select>
             </div>
@@ -352,6 +344,7 @@ const AddCar = () => {
                 onChange={handleInputChange}
               />
             </div>
+
             <div className="formGroup">
               <label htmlFor="originalPrice">Original Price</label>
               <input
@@ -363,6 +356,7 @@ const AddCar = () => {
                 onChange={handleInputChange}
               />
             </div>
+
             <div className="formGroup">
               <label htmlFor="fuelType">Fuel Type</label>
               <select
@@ -383,6 +377,7 @@ const AddCar = () => {
                 <option value="hydrogen">Hydrogen (Fuel Cells)</option>
               </select>
             </div>
+
             <div className="formGroup">
               <label htmlFor="mileage">Mileage</label>
               <input
@@ -394,6 +389,7 @@ const AddCar = () => {
                 onChange={handleInputChange}
               />
             </div>
+
             <div className="formGroup">
               <label htmlFor="year">Year</label>
               <input
@@ -405,6 +401,7 @@ const AddCar = () => {
                 onChange={handleInputChange}
               />
             </div>
+
             <div className="formGroup">
               <label htmlFor="exteriorColor">Exterior Color</label>
               <input
@@ -416,6 +413,7 @@ const AddCar = () => {
                 onChange={handleInputChange}
               />
             </div>
+
             <div className="formGroup">
               <label htmlFor="warranty">Warranty</label>
               <select
@@ -428,6 +426,7 @@ const AddCar = () => {
                 <option value="Not available">Not available</option>
               </select>
             </div>
+
             <div className="formGroup">
               <label htmlFor="door">Door</label>
               <select
@@ -438,12 +437,11 @@ const AddCar = () => {
               >
                 <option value="">Select Door</option>
                 {Array.from({ length: 12 }, (_, i) => i + 1).map((num) => (
-                  <option key={num} value={num}>
-                    {num}
-                  </option>
+                  <option key={num} value={num}>{num}</option>
                 ))}
               </select>
             </div>
+
             <div className="formGroup">
               <label htmlFor="origin">Origin</label>
               <select
@@ -460,6 +458,7 @@ const AddCar = () => {
                 <option value="others">Others</option>
               </select>
             </div>
+
             <div className="formGroup">
               <label htmlFor="transmission">Transmission</label>
               <select
@@ -474,6 +473,7 @@ const AddCar = () => {
                 <option value="dual-clutch">Dual-Clutch</option>
               </select>
             </div>
+
             <div className="formGroup">
               <label htmlFor="bodyType">Body Type</label>
               <select
@@ -491,6 +491,7 @@ const AddCar = () => {
                 <option value="crossover suv">Crossover SUV</option>
               </select>
             </div>
+
             <div className="formGroup">
               <label htmlFor="engine">Engine</label>
               <input
@@ -502,6 +503,7 @@ const AddCar = () => {
                 onChange={handleInputChange}
               />
             </div>
+
             <div className="formGroup">
               <label htmlFor="testDrive">Test Drive</label>
               <select
@@ -514,6 +516,7 @@ const AddCar = () => {
                 <option value="no">No</option>
               </select>
             </div>
+
             <div className="formGroup">
               <label htmlFor="featured">Featured</label>
               <select
@@ -522,10 +525,11 @@ const AddCar = () => {
                 value={formData.featured}
                 onChange={handleInputChange}
               >
-                <option value="yes">Yes</option>
                 <option value="no">No</option>
+                <option value="yes">Yes</option>
               </select>
             </div>
+
             <div className="formGroup">
               <label htmlFor="saleStatus">Sale Status</label>
               <select
@@ -534,11 +538,11 @@ const AddCar = () => {
                 value={formData.saleStatus}
                 onChange={handleInputChange}
               >
-                <option value="">For Sale Or Sold</option>
                 <option value="for-sale">For Sale</option>
                 <option value="sold">Sold</option>
               </select>
             </div>
+
             <div className="formGroup">
               <label htmlFor="discountedPrice">Discounted Price</label>
               <input
@@ -550,6 +554,7 @@ const AddCar = () => {
                 onChange={handleInputChange}
               />
             </div>
+
             <div className="formGroup">
               <label htmlFor="servicePackage">Service Package</label>
               <select
@@ -576,9 +581,7 @@ const AddCar = () => {
               <p className="dragDropText">Drag and drop images here</p>
               <button className="uploadCarMediaBtn">
                 Browse Files
-                <span>
-                  <img src={arrowIcon} alt="Arrow" />
-                </span>
+                <span><i className='bx bxs-arrow-from-bottom'></i></span>
               </button>
               <input
                 type="file"
@@ -592,7 +595,19 @@ const AddCar = () => {
             </div>
             <div className="imageGrid">
               {previewImages.map((preview, index) => (
-                <div key={index} className="imageCard">
+                <div
+                  key={index}
+                  className="imageCard"
+                  draggable
+                  onDragStart={(e) => handleDragStart(e, index)}
+                  onDragOver={handleDragOver}
+                  onDrop={(e) => handleDropImage(e, index)}
+                  onDragEnd={handleDragEnd}
+                  style={{
+                    opacity: dragIndex === index ? 0.5 : 1,
+                    cursor: "grab"
+                  }}
+                >
                   <img src={preview} alt={`Preview ${index + 1}`} />
                   <button
                     onClick={() => removeImage(index)}
@@ -617,19 +632,17 @@ const AddCar = () => {
         {showCarInfo && (
           <>
             <div className="checkboxesContainer">
-              {allTrims
-                .find((t) => t._id === formData.trimId)
-                ?.specifications?.map((spec, index) => (
-                  <div key={index} className="checkboxBLock">
-                    <input
-                      type="checkbox"
-                      id={`spec-${index}`}
-                      checked={formData.specifications[spec] || false}
-                      onChange={(e) => handleSpecChange(spec, e.target.checked)}
-                    />
-                    <label htmlFor={`spec-${index}`}>{spec}</label>
-                  </div>
-                )) || <p>Select a trim to see specifications.</p>}
+              {allTrims.find((t) => t._id === formData.trimId)?.specifications?.map((spec, index) => (
+                <div key={index} className="checkboxBLock">
+                  <input
+                    type="checkbox"
+                    id={`spec-${index}`}
+                    checked={formData.specifications[spec] || false}
+                    onChange={(e) => handleSpecChange(spec, e.target.checked)}
+                  />
+                  <label htmlFor={`spec-${index}`}>{spec}</label>
+                </div>
+              )) || <p>Select a trim to see specifications.</p>}
             </div>
 
             <div style={{ height: "400px" }} className="formGroup">
@@ -637,12 +650,7 @@ const AddCar = () => {
               <div style={{ height: "100%" }} data-color-mode="light">
                 <ReactQuill
                   value={formData.description}
-                  onChange={(value) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      description: value,
-                    }))
-                  }
+                  onChange={(value) => setFormData((prev) => ({ ...prev, description: value }))}
                   theme="snow"
                   style={{ height: "70%", width: "100%" }}
                 />

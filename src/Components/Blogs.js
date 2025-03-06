@@ -3,7 +3,6 @@ import axiosInstance from "../services/axiosInstance";
 import Flash from "./Flash";
 import { AuthContext } from "../Context/AuthContext";
 import uploadIcon from "../Assets/icons/upload.svg";
-import arrowIcon from "../Assets/icons/arrow.svg";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 
@@ -221,7 +220,7 @@ const Blogs = () => {
                                     <button className="uploadCarMediaBtn">
                                         Browse Files
                                         <span>
-                                            <img src={arrowIcon} alt="Arrow" />
+                                            <i className='bx bxs-arrow-from-bottom'></i>
                                         </span>
                                     </button>
                                     <input

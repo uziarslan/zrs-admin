@@ -2,7 +2,6 @@ import React, { useState, useEffect, useContext } from "react";
 import axiosInstance from "../services/axiosInstance";
 import { AuthContext } from "../Context/AuthContext";
 import uploadIcon from "../Assets/icons/upload.svg";
-import arrowIcon from "../Assets/icons/arrow.svg";
 import Flash from "./Flash";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
@@ -30,7 +29,7 @@ export default function EditCar({ car, onClose, onUpdate }) {
     engine: "",
     testDrive: "yes",
     featured: "no",
-    saleStatus: "",
+    saleStatus: "for-sale",
     discountedPrice: "",
     servicePackage: "Available",
     specifications: {},
@@ -41,6 +40,7 @@ export default function EditCar({ car, onClose, onUpdate }) {
   const [showCarInfo, setShowCarInfo] = useState(true);
   const [previewImages, setPreviewImages] = useState([]);
   const [deletedImageFilenames, setDeletedImageFilenames] = useState([]);
+  const [dragIndex, setDragIndex] = useState(null); // Track the dragged item index
 
   // Pre-fill form with car data
   useEffect(() => {
@@ -73,13 +73,6 @@ export default function EditCar({ car, onClose, onUpdate }) {
       }));
       setPreviewImages(car.images.map((img) => img.path) || []);
       setDeletedImageFilenames([]);
-      console.log("Pre-filled car data:", {
-        ...car,
-        images: car.images.map((img) => ({
-          path: img.path,
-          filename: img.filename,
-        })),
-      });
     }
   }, [car]);
 
@@ -88,15 +81,9 @@ export default function EditCar({ car, onClose, onUpdate }) {
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        const manufacturersResponse = await axiosInstance.get(
-          "/api/v1/fetch-logos"
-        );
-        const vehicleTypesResponse = await axiosInstance.get(
-          "/api/v1/fetch-vehicle-types"
-        );
-        const trimsResponse = await axiosInstance.get(
-          "/api/v1/fetch-vehicle-trims"
-        );
+        const manufacturersResponse = await axiosInstance.get("/api/v1/fetch-logos");
+        const vehicleTypesResponse = await axiosInstance.get("/api/v1/fetch-vehicle-types");
+        const trimsResponse = await axiosInstance.get("/api/v1/fetch-vehicle-trims");
 
         if (manufacturersResponse.status === 200) {
           setManufacturers(
@@ -131,7 +118,6 @@ export default function EditCar({ car, onClose, onUpdate }) {
           acc[spec] = true; // Default all trim specs to true
           return acc;
         }, {});
-        // Merge with car.specifications, overriding defaults with database values
         setFormData((prev) => ({
           ...prev,
           specifications: {
@@ -148,90 +134,46 @@ export default function EditCar({ car, onClose, onUpdate }) {
     const { name, value } = e.target;
     let validatedValue = value;
 
-    // Validate enum fields
     if (name === "fuelType") {
       const validFuelTypes = [
-        "gasoline",
-        "diesel",
-        "electric",
-        "hybrid",
-        "plug-in-hybrid",
-        "cng",
-        "lpg",
-        "ethanol",
-        "hydrogen",
+        "gasoline", "diesel", "electric", "hybrid", "plug-in-hybrid",
+        "cng", "lpg", "ethanol", "hydrogen",
       ];
       validatedValue = validFuelTypes.includes(value) ? value : "gasoline";
     } else if (name === "warranty") {
-      validatedValue = ["Available", "Not available"].includes(value)
-        ? value
-        : "Available";
+      validatedValue = ["Available", "Not available"].includes(value) ? value : "Available";
     } else if (name === "origin") {
-      validatedValue = ["gcc", "us", "eu", "cad", "korean", "others"].includes(
-        value
-      )
-        ? value
-        : "gcc";
+      validatedValue = ["gcc", "us", "eu", "cad", "korean", "others"].includes(value) ? value : "gcc";
     } else if (name === "transmission") {
-      validatedValue = ["manual", "automatic", "cvt", "dual-clutch"].includes(
-        value
-      )
-        ? value
-        : "manual";
+      validatedValue = ["manual", "automatic", "cvt", "dual-clutch"].includes(value) ? value : "manual";
     } else if (name === "bodyType") {
       validatedValue = [
-        "sedan",
-        "hatchback",
-        "suv",
-        "coupe",
-        "convertible",
-        "sport",
-        "crossover suv",
-      ].includes(value)
-        ? value
-        : "sedan";
+        "sedan", "hatchback", "suv", "coupe", "convertible", "sport", "crossover suv",
+      ].includes(value) ? value : "sedan";
     } else if (name === "testDrive" || name === "featured") {
       validatedValue = ["yes", "no"].includes(value) ? value : "yes";
     } else if (name === "saleStatus") {
-      validatedValue = ["for-sale", "sold", ""].includes(value) ? value : "";
+      validatedValue = ["for-sale", "sold"].includes(value) ? value : "";
     } else if (name === "servicePackage") {
-      validatedValue = ["Available", "Not available"].includes(value)
-        ? value
-        : "Available";
-    }
-
-    // Handle numeric fields
-    if (
-      name === "originalPrice" ||
-      name === "discountedPrice" ||
-      name === "door"
-    ) {
+      validatedValue = ["Available", "Not available"].includes(value) ? value : "Available";
+    } else if (["originalPrice", "discountedPrice", "door"].includes(name)) {
       validatedValue = value === "" ? "" : parseFloat(value) || "";
     }
 
     setFormData((prev) => ({
       ...prev,
       [name]: validatedValue,
-      ...(name === "manufacturerId" && {
-        vehicleTypeId: "",
-        trimId: "",
-        specifications: {},
-      }),
+      ...(name === "manufacturerId" && { vehicleTypeId: "", trimId: "", specifications: {} }),
       ...(name === "vehicleTypeId" && { trimId: "", specifications: {} }),
     }));
-    console.log(`Updated ${name} to:`, validatedValue);
   };
 
   // Handle specification checkbox changes
   const handleSpecChange = (spec, checked) => {
     setFormData((prev) => ({
       ...prev,
-      specifications: {
-        ...prev.specifications,
-        [spec]: checked,
-      },
+      specifications: { ...prev.specifications, [spec]: checked },
     }));
-    console.log("Updated specifications:", formData.specifications);
   };
 
   // Handle image selection and preview (for new uploads)
@@ -247,8 +189,39 @@ export default function EditCar({ car, onClose, onUpdate }) {
     }));
   };
 
-  // Handle drag-and-drop events
-  const handleDragOver = (e) => e.preventDefault();
+  // Drag and Drop handlers
+  const handleDragStart = (e, index) => {
+    setDragIndex(index);
+    e.dataTransfer.setData("text/plain", index); // Required for Firefox
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault(); // Necessary to allow dropping
+  };
+
+  const handleDropImage = (e, dropIndex) => {
+    e.preventDefault();
+    if (dragIndex === null || dragIndex === dropIndex) return;
+
+    const newPreviewImages = [...previewImages];
+    const newImages = [...formData.images];
+
+    // Reorder both preview and actual file arrays
+    const [draggedPreview] = newPreviewImages.splice(dragIndex, 1);
+    const [draggedImage] = newImages.splice(dragIndex, 1);
+    newPreviewImages.splice(dropIndex, 0, draggedPreview);
+    newImages.splice(dropIndex, 0, draggedImage);
+
+    setPreviewImages(newPreviewImages);
+    setFormData((prev) => ({ ...prev, images: newImages }));
+    setDragIndex(null);
+  };
+
+  const handleDragEnd = () => {
+    setDragIndex(null);
+  };
+
+  // Handle drop for upload area
   const handleDrop = (e) => {
     e.preventDefault();
     handleImageUpload(e);
@@ -257,9 +230,7 @@ export default function EditCar({ car, onClose, onUpdate }) {
   // Remove an image (from preview and form data, and track for backend deletion)
   const removeImage = (indexToRemove) => {
     const imageToRemove = formData.images[indexToRemove];
-    setPreviewImages((prev) =>
-      prev.filter((_, index) => index !== indexToRemove)
-    );
+    setPreviewImages((prev) => prev.filter((_, index) => index !== indexToRemove));
     setFormData((prev) => ({
       ...prev,
       images: prev.images.filter((_, index) => index !== indexToRemove),
@@ -275,7 +246,7 @@ export default function EditCar({ car, onClose, onUpdate }) {
     setShowCarInfo(section === "carInfo");
   };
 
-  // Handle form submission (update car) with image management and validation
+  // Handle form submission (update car)
   const handleSubmit = async () => {
     setIsLoading(true);
     try {
@@ -295,12 +266,9 @@ export default function EditCar({ car, onClose, onUpdate }) {
       });
 
       // Append specifications separately as JSON string
-      formDataToSend.append(
-        "specifications",
-        JSON.stringify(specificationsObj)
-      );
+      formDataToSend.append("specifications", JSON.stringify(specificationsObj));
 
-      // Append existing images (Cloudinary URLs) - unchanged
+      // Append existing images (Cloudinary URLs)
       const existingImages = formData.images
         .filter((image) => !(image instanceof File))
         .map((image) => ({ path: image.path, filename: image.filename }));
@@ -308,30 +276,18 @@ export default function EditCar({ car, onClose, onUpdate }) {
         formDataToSend.append("existingImages", JSON.stringify(existingImages));
       }
 
-      // Append new images (File objects) - unchanged
-      const newImages = formData.images.filter(
-        (image) => image instanceof File
-      );
+      // Append new images (File objects)
+      const newImages = formData.images.filter((image) => image instanceof File);
       newImages.forEach((file) => formDataToSend.append("images", file));
 
-      // Append deleted image filenames - unchanged
+      // Append deleted image filenames
       if (deletedImageFilenames.length > 0) {
-        formDataToSend.append(
-          "deletedImageFilenames",
-          JSON.stringify(deletedImageFilenames)
-        );
+        formDataToSend.append("deletedImageFilenames", JSON.stringify(deletedImageFilenames));
       }
 
-      // Send update request - unchanged
-      const response = await axiosInstance.put(
-        `/api/v1/${car._id}`,
-        formDataToSend,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
+      const response = await axiosInstance.put(`/api/v1/${car._id}`, formDataToSend, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
 
       if (response.status === 200) {
         setMessage({ success: "Car updated successfully!" });
@@ -340,20 +296,15 @@ export default function EditCar({ car, onClose, onUpdate }) {
     } catch (error) {
       console.error("Error updating car:", error);
       setMessage({
-        error:
-          error.response?.data?.error ||
-          error.message ||
-          "Failed to update car",
+        error: error.response?.data?.error || error.message || "Failed to update car",
       });
     }
     setIsLoading(false);
   };
 
-  // Handle car deletion (rely on backend to handle image deletions)
+  // Handle car deletion
   const handleDeleteCar = async () => {
-    if (
-      window.confirm("Are you sure you want to permanently delete this car?")
-    ) {
+    if (window.confirm("Are you sure you want to permanently delete this car?")) {
       setIsLoading(true);
       try {
         const response = await axiosInstance.delete(`/api/v1/${car._id}`);
@@ -369,9 +320,9 @@ export default function EditCar({ car, onClose, onUpdate }) {
     }
   };
 
-  // Handle cancel (close the edit form)
+  // Handle cancel
   const handleCancel = () => {
-    onClose(); // Close the edit form
+    onClose();
   };
 
   if (!car) return <p>Loading...</p>;
@@ -415,9 +366,7 @@ export default function EditCar({ car, onClose, onUpdate }) {
               >
                 <option value="">Select Manufacturer</option>
                 {manufacturers.map(({ brandName, _id }) => (
-                  <option key={_id} value={_id}>
-                    {brandName}
-                  </option>
+                  <option key={_id} value={_id}>{brandName}</option>
                 ))}
               </select>
             </div>
@@ -434,13 +383,9 @@ export default function EditCar({ car, onClose, onUpdate }) {
               >
                 <option value="">Select Vehicle Type</option>
                 {vehicleTypes
-                  .filter(
-                    (vt) => vt.manufacturer?._id === formData.manufacturerId
-                  )
+                  .filter((vt) => vt.manufacturer?._id === formData.manufacturerId)
                   .map((vt) => (
-                    <option key={vt._id} value={vt._id}>
-                      {vt.modelName}
-                    </option>
+                    <option key={vt._id} value={vt._id}>{vt.modelName}</option>
                   ))}
               </select>
             </div>
@@ -457,13 +402,9 @@ export default function EditCar({ car, onClose, onUpdate }) {
               >
                 <option value="">Select Trim</option>
                 {allTrims
-                  .filter(
-                    (trim) => trim.vehicleType?._id === formData.vehicleTypeId
-                  )
+                  .filter((trim) => trim.vehicleType?._id === formData.vehicleTypeId)
                   .map((trim) => (
-                    <option key={trim._id} value={trim._id}>
-                      {trim.trimName}
-                    </option>
+                    <option key={trim._id} value={trim._id}>{trim.trimName}</option>
                   ))}
               </select>
             </div>
@@ -565,9 +506,7 @@ export default function EditCar({ car, onClose, onUpdate }) {
               >
                 <option value="">Select Door</option>
                 {Array.from({ length: 12 }, (_, i) => i + 1).map((num) => (
-                  <option key={num} value={num}>
-                    {num}
-                  </option>
+                  <option key={num} value={num}>{num}</option>
                 ))}
               </select>
             </div>
@@ -661,7 +600,6 @@ export default function EditCar({ car, onClose, onUpdate }) {
                 value={formData.saleStatus}
                 onChange={handleInputChange}
               >
-                <option value="">For Sale Or Sold</option>
                 <option value="for-sale">For Sale</option>
                 <option value="sold">Sold</option>
               </select>
@@ -703,9 +641,7 @@ export default function EditCar({ car, onClose, onUpdate }) {
               <p className="dragDropText">Drag and drop images here</p>
               <button className="uploadCarMediaBtn">
                 Browse Files
-                <span>
-                  <img src={arrowIcon} alt="Arrow" />
-                </span>
+                <span><i className='bx bxs-arrow-from-bottom'></i></span>
               </button>
               <input
                 type="file"
@@ -719,7 +655,19 @@ export default function EditCar({ car, onClose, onUpdate }) {
             </div>
             <div className="imageGrid">
               {previewImages.map((preview, index) => (
-                <div key={index} className="imageCard">
+                <div
+                  key={index}
+                  className="imageCard"
+                  draggable
+                  onDragStart={(e) => handleDragStart(e, index)}
+                  onDragOver={handleDragOver}
+                  onDrop={(e) => handleDropImage(e, index)}
+                  onDragEnd={handleDragEnd}
+                  style={{
+                    opacity: dragIndex === index ? 0.5 : 1,
+                    cursor: "grab"
+                  }}
+                >
                   <img src={preview} alt={`Preview ${index + 1}`} />
                   <button
                     onClick={() => removeImage(index)}
@@ -744,19 +692,17 @@ export default function EditCar({ car, onClose, onUpdate }) {
         {showCarInfo && (
           <>
             <div className="checkboxesContainer">
-              {allTrims
-                .find((t) => t._id === formData.trimId)
-                ?.specifications?.map((spec, index) => (
-                  <div key={index} className="checkboxBLock">
-                    <input
-                      type="checkbox"
-                      id={`spec-${index}`}
-                      checked={formData.specifications[spec] ?? false}
-                      onChange={(e) => handleSpecChange(spec, e.target.checked)}
-                    />
-                    <label htmlFor={`spec-${index}`}>{spec}</label>
-                  </div>
-                )) || <p>Select a trim to see specifications.</p>}
+              {allTrims.find((t) => t._id === formData.trimId)?.specifications?.map((spec, index) => (
+                <div key={index} className="checkboxBLock">
+                  <input
+                    type="checkbox"
+                    id={`spec-${index}`}
+                    checked={formData.specifications[spec] ?? false}
+                    onChange={(e) => handleSpecChange(spec, e.target.checked)}
+                  />
+                  <label htmlFor={`spec-${index}`}>{spec}</label>
+                </div>
+              )) || <p>Select a trim to see specifications.</p>}
             </div>
 
             <div style={{ height: "400px" }} className="formGroup">
@@ -764,12 +710,7 @@ export default function EditCar({ car, onClose, onUpdate }) {
               <div style={{ height: "100%" }} data-color-mode="light">
                 <ReactQuill
                   value={formData.description}
-                  onChange={(value) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      description: value,
-                    }))
-                  }
+                  onChange={(value) => setFormData((prev) => ({ ...prev, description: value }))}
                   theme="snow"
                   style={{ height: "70%", width: "100%" }}
                 />
