@@ -4,6 +4,7 @@ import Flash from "../Components/Flash";
 import { AuthContext } from "../Context/AuthContext";
 
 const AddManufacturer = () => {
+  // State for the form
   const [formData, setFormData] = useState({
     manufacturer: "",
     logo: null,
@@ -11,13 +12,16 @@ const AddManufacturer = () => {
     currentLogo: null,
     currentLogoFilename: null,
   });
+
+  // State for messages, logos, and edit mode
   const [message, setMessage] = useState({});
-  const [logos, setLogos] = useState([]); // State to hold fetched logos
+  const [logos, setLogos] = useState([]);
   const [editMode, setEditMode] = useState(false);
   const [editId, setEditId] = useState(null);
 
   const { setIsLoading } = useContext(AuthContext);
 
+  // Fetch logos on component mount
   useEffect(() => {
     const fetchLogos = async () => {
       setIsLoading(true);
@@ -36,6 +40,7 @@ const AddManufacturer = () => {
     fetchLogos();
   }, [setIsLoading]);
 
+  // Handle form input changes
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prevState) => ({
@@ -44,6 +49,7 @@ const AddManufacturer = () => {
     }));
   };
 
+  // Handle file input changes
   const handleFileChange = (e) => {
     if (e.target.files && e.target.files[0]) {
       setFormData((prevState) => ({
@@ -56,6 +62,7 @@ const AddManufacturer = () => {
     }
   };
 
+  // Handle form submission (create or update)
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
@@ -117,7 +124,7 @@ const AddManufacturer = () => {
     setIsLoading(false);
   };
 
-  // Function to start editing a manufacturer
+  // Handle edit button click
   const handleEdit = (logo) => {
     setFormData({
       manufacturer: logo.brandName,
@@ -130,7 +137,7 @@ const AddManufacturer = () => {
     setEditId(logo._id);
   };
 
-  // Function to remove the current logo and send a request to the backend
+  // Handle removal of current logo
   const removeCurrentLogo = async () => {
     setIsLoading(true);
     try {
@@ -148,7 +155,6 @@ const AddManufacturer = () => {
           currentLogo: null,
           currentLogoFilename: null,
         }));
-        // Fetch logos again to reflect the deletion
         const fetchResponse = await axiosInstance.get("/api/v1/fetch-logos");
         if (fetchResponse.data && fetchResponse.data.logos) {
           setLogos(fetchResponse.data.logos);
@@ -161,11 +167,52 @@ const AddManufacturer = () => {
     setIsLoading(false);
   };
 
+  // Drag and Drop Handlers
+  const handleDragStart = (e, id) => {
+    e.dataTransfer.setData("text/plain", id);
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault(); // Required to allow dropping
+  };
+
+  const handleDrop = async (e, targetId) => {
+    e.preventDefault();
+    const draggedId = e.dataTransfer.getData("text/plain");
+    if (draggedId === targetId) return; // Prevent dropping on itself
+
+    const draggedIndex = logos.findIndex((logo) => logo._id === draggedId);
+    const targetIndex = logos.findIndex((logo) => logo._id === targetId);
+
+    if (draggedIndex === -1 || targetIndex === -1) return;
+
+    // Rearrange logos in state
+    const newLogos = [...logos];
+    const [draggedLogo] = newLogos.splice(draggedIndex, 1);
+    newLogos.splice(targetIndex, 0, draggedLogo);
+
+    setLogos(newLogos);
+
+    // Send new order to backend
+    const newOrder = newLogos.map((logo) => logo._id);
+    try {
+      await axiosInstance.post("/api/v1/update-logo-order", { newOrder });
+    } catch (error) {
+      console.error("Error updating logo order:", error);
+      setMessage({ error: "Failed to update logo order" });
+    }
+  };
+
   return (
     <div>
+      {/* Flash message component */}
       <Flash message={message} />
+
+      {/* Heading */}
       <h2 className="screenHeading">Add Manufacturer</h2>
       <p className="screenSubHeading">We are glad to see you again!</p>
+
+      {/* Manufacturer form */}
       <form className="manufactureForm" onSubmit={handleSubmit}>
         <div className="formGroup">
           <label htmlFor="manufacturer">Manufacturer</label>
@@ -230,35 +277,47 @@ const AddManufacturer = () => {
           </button>
         )}
       </form>
+
+      {/* Logos grid with drag and drop */}
       <div className="row">
-        {logos
-          .filter((logo) => logo._id !== editId)
-          .map((logo, index) => (
-            <div key={index} className="col-12 col-sm-6 col-md-4 col-lg-3 mb-3">
-              <div className="card">
-                {logo.logo && logo.logo.path ? (
-                  <img
-                    src={logo.logo.path}
-                    className="card-img-top"
-                    alt={logo.logo.filename}
-                  />
-                ) : (
-                  // Placeholder or default image
-                  <div className="noLogoPlaceholder">No Logo</div>
-                )}
-                <div className="card-body">
-                  <h5 className="card-title">{logo.brandName}</h5>
-                  <button
-                    type="button"
-                    className="btn btn-primary btn-sm"
-                    onClick={() => handleEdit(logo)}
-                  >
-                    Edit
-                  </button>
-                </div>
+        {logos.map((logo) => (
+          <div key={logo._id} className="col-12 col-sm-6 col-md-4 col-lg-3 mb-3">
+            <div
+              className={`card ${editMode && logo._id === editId ? "editing" : ""}`}
+              draggable={!(editMode && logo._id === editId)}
+              onDragStart={(e) =>
+                !(editMode && logo._id === editId) && handleDragStart(e, logo._id)
+              }
+              onDragOver={(e) =>
+                !(editMode && logo._id === editId) && handleDragOver(e)
+              }
+              onDrop={(e) =>
+                !(editMode && logo._id === editId) && handleDrop(e, logo._id)
+              }
+            >
+              {logo.logo && logo.logo.path ? (
+                <img
+                  src={logo.logo.path}
+                  className="card-img-top"
+                  alt={logo.logo.filename}
+                />
+              ) : (
+                <div className="noLogoPlaceholder">No Logo</div>
+              )}
+              <div className="card-body">
+                <h5 className="card-title">{logo.brandName}</h5>
+                <button
+                  type="button"
+                  className="btn btn-primary btn-sm"
+                  onClick={() => handleEdit(logo)}
+                  disabled={editMode}
+                >
+                  Edit
+                </button>
               </div>
             </div>
-          ))}
+          </div>
+        ))}
       </div>
     </div>
   );
