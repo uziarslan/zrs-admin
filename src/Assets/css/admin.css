@@ -451,6 +451,8 @@ html {
   height: 119px;
   border-radius: 12px;
   position: relative;
+  border: 2px solid transparent;
+  transition: border-color 0.3s ease;
 }
 
 .imageCard img {
@@ -458,6 +460,65 @@ html {
   height: 100%;
   object-fit: contain;
   border-radius: 12px;
+}
+
+.imageCardError {
+  border: 2px solid #ff0004;
+  background-color: rgba(255, 0, 4, 0.1);
+}
+
+.imageInfo {
+  position: absolute;
+  bottom: 5px;
+  left: 5px;
+  right: 5px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  background: rgba(0, 0, 0, 0.7);
+  padding: 4px 6px;
+  border-radius: 6px;
+  font-size: 0.7rem;
+}
+
+.imageSize {
+  color: #fff;
+  font-weight: 500;
+}
+
+.imageSizeError {
+  color: #ffcccc;
+}
+
+.imageErrorText {
+  color: #ff0004;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.65rem;
+}
+
+.imageErrorText i {
+  font-size: 0.8rem;
+}
+
+.imageErrorSummary {
+  background-color: #fff3cd;
+  border: 1px solid #ffc107;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin: 15px 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #856404;
+  font-size: 0.85rem;
+}
+
+.imageErrorSummary i {
+  font-size: 1.2rem;
+  color: #ff0004;
 }
 
 .removeImageButton {

@@ -40,6 +40,8 @@ const AddCar = () => {
   const [previewImages, setPreviewImages] = useState([]);
   const { setIsLoading } = useContext(AuthContext);
   const [dragIndex, setDragIndex] = useState(null); // Track the dragged item index
+  const [imageErrors, setImageErrors] = useState({}); // Track which images have errors (index -> error message)
+  const [imageSizes, setImageSizes] = useState({}); // Track file sizes (index -> size in MB)
 
   // Fetch manufacturers, vehicle types, and trims
   useEffect(() => {
@@ -107,17 +109,59 @@ const AddCar = () => {
     }
   }, [formData.trimId, allTrims]);
 
+  // Format file size to readable format
+  const formatFileSize = (bytes) => {
+    if (bytes === 0) return "0 Bytes";
+    const k = 1024;
+    const sizes = ["Bytes", "KB", "MB", "GB"];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + " " + sizes[i];
+  };
+
   // Handle image selection and preview
   const handleImageUpload = (e) => {
     const files = e.type === "change" ? e.target.files : e.dataTransfer.files;
     if (!files) return;
     const fileArray = Array.from(files);
-    const newPreviews = fileArray.map((file) => URL.createObjectURL(file));
+    const MAX_SIZE = 10 * 1024 * 1024; // 10MB in bytes
+
+    const newPreviews = [];
+    const allFiles = [];
+    const newErrors = {};
+    const newSizes = {};
+    const startIndex = previewImages.length;
+
+    fileArray.forEach((file, fileIndex) => {
+      const currentIndex = startIndex + fileIndex;
+      const fileSize = file.size;
+      const fileSizeMB = fileSize / (1024 * 1024);
+
+      // Always add preview and track size
+      newPreviews.push(URL.createObjectURL(file));
+      allFiles.push(file);
+      newSizes[currentIndex] = fileSizeMB;
+
+      // Mark as error if exceeds limit
+      if (fileSize > MAX_SIZE) {
+        newErrors[currentIndex] = `File size (${formatFileSize(fileSize)}) exceeds 10MB limit`;
+      }
+    });
+
     setPreviewImages((prev) => [...prev, ...newPreviews]);
     setFormData((prev) => ({
       ...prev,
-      images: [...prev.images, ...fileArray],
+      images: [...prev.images, ...allFiles],
     }));
+    setImageErrors((prev) => ({ ...prev, ...newErrors }));
+    setImageSizes((prev) => ({ ...prev, ...newSizes }));
+
+    // Show error message if any files exceed limit
+    if (Object.keys(newErrors).length > 0) {
+      const errorCount = Object.keys(newErrors).length;
+      setMessage({
+        error: `${errorCount} file(s) exceed the 10MB limit. Please remove them before uploading.`
+      });
+    }
   };
 
   // Drag and Drop handlers
@@ -130,6 +174,35 @@ const AddCar = () => {
     e.preventDefault(); // Necessary to allow dropping
   };
 
+  // Helper function to reorder object keys based on drag and drop
+  const reorderObjectKeys = (obj, fromIndex, toIndex) => {
+    const entries = Object.entries(obj).map(([key, value]) => [parseInt(key), value]);
+    const sortedEntries = entries.sort((a, b) => a[0] - b[0]);
+
+    if (fromIndex === toIndex) return obj;
+
+    const reordered = {};
+    sortedEntries.forEach(([key, value]) => {
+      let newKey = key;
+      if (key === fromIndex) {
+        newKey = toIndex;
+      } else if (fromIndex < toIndex) {
+        // Moving down
+        if (key > fromIndex && key <= toIndex) {
+          newKey = key - 1;
+        }
+      } else {
+        // Moving up
+        if (key >= toIndex && key < fromIndex) {
+          newKey = key + 1;
+        }
+      }
+      reordered[newKey] = value;
+    });
+
+    return reordered;
+  };
+
   const handleDropImage = (e, dropIndex) => {
     e.preventDefault();
     if (dragIndex === null || dragIndex === dropIndex) return;
@@ -137,14 +210,22 @@ const AddCar = () => {
     const newPreviewImages = [...previewImages];
     const newImages = [...formData.images];
 
-    // Reorder both preview and actual file arrays
+    // Reorder preview images
     const [draggedPreview] = newPreviewImages.splice(dragIndex, 1);
-    const [draggedImage] = newImages.splice(dragIndex, 1);
     newPreviewImages.splice(dropIndex, 0, draggedPreview);
+
+    // Reorder actual file arrays
+    const [draggedImage] = newImages.splice(dragIndex, 1);
     newImages.splice(dropIndex, 0, draggedImage);
+
+    // Reorder errors and sizes using helper function
+    const reorderedErrors = reorderObjectKeys(imageErrors, dragIndex, dropIndex);
+    const reorderedSizes = reorderObjectKeys(imageSizes, dragIndex, dropIndex);
 
     setPreviewImages(newPreviewImages);
     setFormData((prev) => ({ ...prev, images: newImages }));
+    setImageErrors(reorderedErrors);
+    setImageSizes(reorderedSizes);
     setDragIndex(null);
   };
 
@@ -165,6 +246,33 @@ const AddCar = () => {
       ...prev,
       images: prev.images.filter((_, index) => index !== indexToRemove),
     }));
+
+    // Clean up errors and sizes for removed image
+    setImageErrors((prev) => {
+      const newErrors = {};
+      Object.keys(prev).forEach((key) => {
+        const keyNum = parseInt(key);
+        if (keyNum < indexToRemove) {
+          newErrors[keyNum] = prev[key];
+        } else if (keyNum > indexToRemove) {
+          newErrors[keyNum - 1] = prev[key];
+        }
+      });
+      return newErrors;
+    });
+
+    setImageSizes((prev) => {
+      const newSizes = {};
+      Object.keys(prev).forEach((key) => {
+        const keyNum = parseInt(key);
+        if (keyNum < indexToRemove) {
+          newSizes[keyNum] = prev[key];
+        } else if (keyNum > indexToRemove) {
+          newSizes[keyNum - 1] = prev[key];
+        }
+      });
+      return newSizes;
+    });
   };
 
   // Toggle between sections
@@ -174,6 +282,14 @@ const AddCar = () => {
 
   // Handle form submission
   const handleSubmit = async () => {
+    // Check if there are any image errors before submitting
+    if (Object.keys(imageErrors).length > 0) {
+      setMessage({
+        error: "Please remove images that exceed 10MB before submitting."
+      });
+      return;
+    }
+
     setIsLoading(true);
     try {
       const formDataToSend = new FormData();
@@ -187,9 +303,11 @@ const AddCar = () => {
         }
       });
 
-      // Append images in the order they appear in the state
-      formData.images.forEach((file) => {
-        formDataToSend.append("images", file);
+      // Append only valid images (those without errors) in the order they appear
+      formData.images.forEach((file, index) => {
+        if (!imageErrors[index]) {
+          formDataToSend.append("images", file);
+        }
       });
 
       const response = await axiosInstance.post("/api/v1/cars", formDataToSend, {
@@ -224,6 +342,8 @@ const AddCar = () => {
           images: [],
         });
         setPreviewImages([]);
+        setImageErrors({});
+        setImageSizes({});
       }
     } catch (error) {
       console.error(error);
@@ -260,6 +380,8 @@ const AddCar = () => {
       images: [],
     });
     setPreviewImages([]);
+    setImageErrors({});
+    setImageSizes({});
     setShowCarInfo(true);
   };
 
@@ -594,30 +716,55 @@ const AddCar = () => {
               />
             </div>
             <div className="imageGrid">
-              {previewImages.map((preview, index) => (
-                <div
-                  key={index}
-                  className="imageCard"
-                  draggable
-                  onDragStart={(e) => handleDragStart(e, index)}
-                  onDragOver={handleDragOver}
-                  onDrop={(e) => handleDropImage(e, index)}
-                  onDragEnd={handleDragEnd}
-                  style={{
-                    opacity: dragIndex === index ? 0.5 : 1,
-                    cursor: "grab"
-                  }}
-                >
-                  <img src={preview} alt={`Preview ${index + 1}`} />
-                  <button
-                    onClick={() => removeImage(index)}
-                    className="removeImageButton"
+              {previewImages.map((preview, index) => {
+                const hasError = imageErrors[index];
+                const fileSize = imageSizes[index];
+                return (
+                  <div
+                    key={index}
+                    className={`imageCard ${hasError ? "imageCardError" : ""}`}
+                    draggable={!hasError}
+                    onDragStart={(e) => !hasError && handleDragStart(e, index)}
+                    onDragOver={handleDragOver}
+                    onDrop={(e) => !hasError && handleDropImage(e, index)}
+                    onDragEnd={handleDragEnd}
+                    style={{
+                      opacity: dragIndex === index ? 0.5 : 1,
+                      cursor: hasError ? "not-allowed" : "grab"
+                    }}
                   >
-                    <i className="bx bx-trash"></i>
-                  </button>
-                </div>
-              ))}
+                    <img src={preview} alt={`Preview ${index + 1}`} />
+                    <div className="imageInfo">
+                      {fileSize !== undefined && (
+                        <span className={`imageSize ${hasError ? "imageSizeError" : ""}`}>
+                          {fileSize.toFixed(2)} MB
+                        </span>
+                      )}
+                      {hasError && (
+                        <span className="imageErrorText">
+                          <i className="bx bx-error-circle"></i> Too large
+                        </span>
+                      )}
+                    </div>
+                    <button
+                      onClick={() => removeImage(index)}
+                      className="removeImageButton"
+                    >
+                      <i className="bx bx-trash"></i>
+                    </button>
+                  </div>
+                );
+              })}
             </div>
+            {Object.keys(imageErrors).length > 0 && (
+              <div className="imageErrorSummary">
+                <i className="bx bx-error-circle"></i>
+                <span>
+                  {Object.keys(imageErrors).length} image(s) exceed the 10MB limit.
+                  Please remove them before submitting.
+                </span>
+              </div>
+            )}
             <div className="addCarButtonWrapper">
               <button className="cancelFormBtn" onClick={handleCancel}>
                 Cancel
