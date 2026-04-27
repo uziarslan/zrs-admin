@@ -30,21 +30,27 @@ const AuthProvider = ({ children }) => {
 
   const login = async (userData) => {
     setIsLoading(true);
-    const response = await authService.login(userData);
-    if (response.data) {
-      const loggedInUser = await authService.getUser();
-      setUser(loggedInUser);
+    try {
+      const response = await authService.login(userData);
+      if (response.data) {
+        const loggedInUser = await authService.getUser();
+        setUser(loggedInUser);
+      }
+      return response;
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
-    return response;
   };
 
   const register = async (userData) => {
     setIsLoading(true);
-    await authService.register(userData);
-    const registeredUser = await authService.getUser();
-    setUser(registeredUser);
-    setIsLoading(false);
+    try {
+      await authService.register(userData);
+      const registeredUser = await authService.getUser();
+      setUser(registeredUser);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const logout = () => {
@@ -65,6 +71,7 @@ const AuthProvider = ({ children }) => {
     <AuthContext.Provider
       value={{
         user,
+        admin: user,
         login,
         register,
         logout,
